@@ -33,16 +33,23 @@ def read_csv_netlist(filename):
     return netlist
 
 
+# Needs to return list of Line
+def find_routes(chip_list, netlist):
+    route1 = [(1,5),(2,5),(3,5),(4,5),(5,5),(6,5)]
+    route2 = [(1,5),(1,4),(2,4),(3,4), (4,4)]
 
-# def find_routes(chip_list):
-#     find_route(x_start, y_start x_end, y_end)
-#     pass
+    netlist[0].route = route1
+    netlist[1].route = route2
+    return netlist
+
+    # find_route(x_start, y_start x_end, y_end)
+    # pass
 
 # def find_route(x_start, y_start x_end, y_end):
 #     pass
 
 # visualize grid
-def create_grid(chip_list):
+def create_grid(chip_list, netlist_routes):
     id_list = []
     x_list = []
     y_list = []
@@ -52,8 +59,16 @@ def create_grid(chip_list):
         x_list.append(chip.x)
         y_list.append(chip.y)
 
+    x_lines = []
+    y_lines = []
+    for lines in netlist_routes:
+        for line in lines.route:
+            x_lines.append(line[0])
+            y_lines.append(line[1])
+
     # plot
     plt.scatter(x_list, y_list, zorder=2, s=300)
+    plt.step(x_lines, y_lines, linewidth=2.5)
     for i, txt in enumerate(id_list):
         plt.annotate(txt, (x_list[i], y_list[i]), ha='center', va='center')
 
@@ -81,7 +96,7 @@ class Line:
 def main():
     chip_list = read_csv_chips("gates&netlists/chip_0/print_0.csv")
     netlist = read_csv_netlist("gates&netlists/chip_0/netlist_1.csv")
-    # routes = find_routes()
-    create_grid(chip_list)
+    netlist_routes = find_routes(chip_list, netlist)
+    create_grid(chip_list, netlist_routes)
 
 main()
