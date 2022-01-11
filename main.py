@@ -4,6 +4,7 @@
 import csv
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
 
 # read csv  print_0 and create chips
 def read_csv_chips(filename):
@@ -26,9 +27,12 @@ def read_csv_netlist(filename):
         netlist = []
 
         for number, row in enumerate(csvreader):
-            line = Line(number, row[0], row[1],[])
+            try:
+                line = Line(number, row[0], row[1],[])
 
-            netlist.append(line)
+                netlist.append(line)
+            except IndexError:
+                pass
 
     return netlist
 
@@ -79,6 +83,17 @@ def create_grid(chip_list, netlist_routes):
     plt.tight_layout()
     plt.savefig("gates&netlists/plots/plot1.png")
 
+def create_output(netlist_routes,chip, net):
+    with open('gates&netlists/chip_0/output.csv', 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["net","wires"])
+
+        for line in netlist_routes:
+            newrow= (int(line.start), int(line.end))
+            writer.writerow([tuple(newrow), line.route])
+        
+        writer.writerow([f"chip_{chip}_net_{net}"])
+
 # chip class that has a function that
 class Chip:
     def __init__(self, id, x, y):
@@ -93,10 +108,11 @@ class Line:
         self.end = chip_end
         self.route = route
 
-def main():
-    chip_list = read_csv_chips("gates&netlists/chip_0/print_0.csv")
-    netlist = read_csv_netlist("gates&netlists/chip_0/netlist_1.csv")
+def main(chip, net):
+    chip_list = read_csv_chips(f"gates&netlists/chip_{chip}/print_0.csv")
+    netlist = read_csv_netlist(f"gates&netlists/chip_{chip}/netlist_{net}.csv")
     netlist_routes = find_routes(chip_list, netlist)
     create_grid(chip_list, netlist_routes)
+    create_output(netlist_routes, chip, net)
 
-main()
+main(sys.argv[1], sys.argv[2])
