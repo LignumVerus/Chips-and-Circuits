@@ -4,6 +4,7 @@
 import csv
 import matplotlib.pyplot as plt
 import numpy as np
+from collections import Counter
 
 # read csv  print_0 and create chips
 def read_csv_chips(filename):
@@ -79,6 +80,19 @@ def create_grid(chip_list, netlist_routes):
     plt.tight_layout()
     plt.savefig("gates&netlists/plots/plot1.png")
 
+# compute costs
+def costs(netlist):
+    n = 0 
+    route_coords = []
+    for line in netlist:
+        n += len(line.route) - 1 
+        route_coords.append(line.route[1:-1])
+    
+    counts = Counter(route_coords)
+    k = sum(value - 1 for key, value in counts.iteritems() if key > 1)
+    
+    return n + 300 * k
+
 # chip class that has a function that
 class Chip:
     def __init__(self, id, x, y):
@@ -98,5 +112,6 @@ def main():
     netlist = read_csv_netlist("gates&netlists/chip_0/netlist_1.csv")
     netlist_routes = find_routes(chip_list, netlist)
     create_grid(chip_list, netlist_routes)
+    
 
 main()
