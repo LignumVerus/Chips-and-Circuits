@@ -13,7 +13,7 @@ def read_csv_chips(filename):
         csvreader = csv.reader(file)
         next(csvreader)
         chip_list = []
-        
+
         # creates chips with id, x coordinate and y coordinate
         for row in csvreader:
             chip = Chip(row[0], row[1], row[2])
@@ -30,7 +30,7 @@ def read_csv_netlist(filename):
 
         for number, row in enumerate(csvreader):
             try:
-                line = Line(number, row[0], row[1],[])
+                line = Line(number, row[0], row[1], [])
                 netlist.append(line)
             except IndexError:
                 pass
@@ -40,8 +40,8 @@ def read_csv_netlist(filename):
 
 # Needs to return list of Line
 def find_routes(chip_list, netlist):
-    route1 = [(1,5),(2,5),(3,5),(4,5),(5,5),(6,5)]
-    route2 = [(1,5),(1,4),(2,4),(3,4), (4,4)]
+    route1 = [(1, 5), (2, 5), (3, 5), (4, 5), (5, 5), (6, 5)]
+    route2 = [(1, 5), (1, 4), (2, 4), (3, 4), (4, 4)]
 
     netlist[0].route = route1
     netlist[1].route = route2
@@ -49,6 +49,7 @@ def find_routes(chip_list, netlist):
 
     # find_route(x_start, y_start x_end, y_end)
     # pass
+
 
 # def find_route(x_start, y_start x_end, y_end):
 #     pass
@@ -75,19 +76,19 @@ def create_grid(chip_list, netlist_routes):
     plt.scatter(x_list, y_list, zorder=2, s=300)
     plt.step(x_lines, y_lines, linewidth=2.5)
     for i, txt in enumerate(id_list):
-        plt.annotate(txt, (x_list[i], y_list[i]), ha='center', va='center')
+        plt.annotate(txt, (x_list[i], y_list[i]), ha="center", va="center")
 
     plt.xlim([min(x_list) - 1, max(x_list) + 2])
     plt.ylim([min(y_list) - 1, max(y_list) + 2])
     plt.grid(visible=True, zorder=0)
-    plt.title('Circuit Board Grid')
+    plt.title("Circuit Board Grid")
     plt.tight_layout()
     plt.savefig("plots/plot1.png")
 
 
 # compute costs
 def costs(netlist):
-    n = 0 
+    n = 0
     route_coords = []
     for line in netlist:
         if len(line.route) > 0:
@@ -95,7 +96,7 @@ def costs(netlist):
             route_coords.append(line.route[1:-1])
 
     counts = dict()
-    for route in route_coords:  
+    for route in route_coords:
         for coordinate in route:
             if coordinate in counts:
                 counts[coordinate] += 1
@@ -103,19 +104,19 @@ def costs(netlist):
                 counts[coordinate] = 1
 
     k = sum(value - 1 for value in counts.values())
-    
+
     return n + 300 * k
 
 
-def create_output(netlist_routes,chip, net):
-    with open('gates&netlists/chip_0/output.csv', 'w', newline='') as f:
+def create_output(netlist_routes, chip, net):
+    with open("gates&netlists/chip_0/output.csv", "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["net","wires"])
+        writer.writerow(["net", "wires"])
 
         for line in netlist_routes:
-            newrow= (int(line.start), int(line.end))
+            newrow = (int(line.start), int(line.end))
             writer.writerow([tuple(newrow), line.route])
-        
+
         cost = costs(netlist_routes)
         writer.writerow([f"chip_{chip}_net_{net}", int(cost)])
 
@@ -141,7 +142,7 @@ def main(chip, net):
     netlist = read_csv_netlist(f"gates&netlists/chip_{chip}/netlist_{net}.csv")
     netlist_routes = find_routes(chip_list, netlist)
     create_grid(chip_list, netlist_routes)
-    
+
     create_output(netlist_routes, chip, net)
 
 
