@@ -4,8 +4,8 @@
 import csv
 import matplotlib.pyplot as plt
 import numpy as np
-from collections import Counter
 import sys
+
 
 # read csv  print_0 and create chips
 def read_csv_chips(filename):
@@ -17,9 +17,10 @@ def read_csv_chips(filename):
         # creates chips with id, x coordinate and y coordinate
         for row in csvreader:
             chip = Chip(row[0], row[1], row[2])
-
             chip_list.append(chip)
+
     return chip_list
+
 
 def read_csv_netlist(filename):
     with open(filename) as file:
@@ -30,7 +31,6 @@ def read_csv_netlist(filename):
         for number, row in enumerate(csvreader):
             try:
                 line = Line(number, row[0], row[1],[])
-
                 netlist.append(line)
             except IndexError:
                 pass
@@ -53,12 +53,12 @@ def find_routes(chip_list, netlist):
 # def find_route(x_start, y_start x_end, y_end):
 #     pass
 
+
 # visualize grid
 def create_grid(chip_list, netlist_routes):
     id_list = []
     x_list = []
     y_list = []
-    
     for chip in chip_list:
         id_list.append(chip.id)
         x_list.append(chip.x)
@@ -84,6 +84,7 @@ def create_grid(chip_list, netlist_routes):
     plt.tight_layout()
     plt.savefig("plots/plot1.png")
 
+
 # compute costs
 def costs(netlist):
     n = 0 
@@ -101,10 +102,10 @@ def costs(netlist):
             else:
                 counts[coordinate] = 1
 
-    # counts = Counter(route_coords)
     k = sum(value - 1 for value in counts.values())
     
     return n + 300 * k
+
 
 def create_output(netlist_routes,chip, net):
     with open('gates&netlists/chip_0/output.csv', 'w', newline='') as f:
@@ -118,12 +119,14 @@ def create_output(netlist_routes,chip, net):
         cost = costs(netlist_routes)
         writer.writerow([f"chip_{chip}_net_{net}", int(cost)])
 
+
 # chip class that has a function that
 class Chip:
     def __init__(self, id, x, y):
         self.id = id
         self.x = int(x)
         self.y = int(y)
+
 
 class Line:
     def __init__(self, id, chip_start, chip_end, route):
@@ -132,6 +135,7 @@ class Line:
         self.end = chip_end
         self.route = route
 
+
 def main(chip, net):
     chip_list = read_csv_chips(f"gates&netlists/chip_{chip}/print_0.csv")
     netlist = read_csv_netlist(f"gates&netlists/chip_{chip}/netlist_{net}.csv")
@@ -139,5 +143,6 @@ def main(chip, net):
     create_grid(chip_list, netlist_routes)
     
     create_output(netlist_routes, chip, net)
+
 
 main(sys.argv[1], sys.argv[2])
