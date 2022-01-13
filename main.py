@@ -8,7 +8,7 @@ import sys
 
 
 # read csv  print_0 and create chips
-def read_csv_chips(filename):
+def read_csv_chips(filename, board):
     with open(filename) as file:
         csvreader = csv.reader(file)
         next(csvreader)
@@ -18,6 +18,7 @@ def read_csv_chips(filename):
         for row in csvreader:
             chip = Chip(row[0], row[1], row[2])
             chip_list.append(chip)
+            board.add_chip(chip.x, chip.y)
 
     return chip_list
 
@@ -39,12 +40,14 @@ def read_csv_netlist(filename):
 
 
 # Needs to return list of Line
-def find_routes(chip_list, netlist):
+def find_routes(chip_list, netlist, board):
     route1 = [(1, 5), (2, 5), (3, 5), (4, 5), (5, 5), (6, 5)]
     route2 = [(1, 5), (1, 4), (2, 4), (3, 4), (4, 4)]
 
     netlist[0].route = route1
     netlist[1].route = route2
+
+    #board.add_lines(route1, route2)
     return netlist
 
     # find_route(x_start, y_start x_end, y_end)
@@ -137,12 +140,34 @@ class Line:
         self.route = route
 
 
-def main(chip, net):
-    chip_list = read_csv_chips(f"gates&netlists/chip_{chip}/print_{chip}.csv")
-    netlist = read_csv_netlist(f"gates&netlists/chip_{chip}/netlist_{net}.csv")
-    netlist_routes = find_routes(chip_list, netlist)
-    create_grid(chip_list, netlist_routes)
+class Board:
+    def __init__(self):
+        # {(1,1): (chip_id, [line_id1, line_id2]}
+        self.board = {}
     
+    # add chip to dictionary with coordinates as key
+    def add_chip(self, chip_x, chip_y):
+        #TODO: add chip to dictonary
+        #if coordinate not in dict, add to dict and add chip
+        #else update entry
+        pass
+
+    # add line to dictionary with coordinates as key
+    def add_line(self, line):
+        #TODO: add line to dictionary
+        #if coordinate not in dict, add to dict and add line
+        #else update entry
+        pass
+
+
+def main(chip, net):
+    # create a board 
+    board = Board()
+    chip_list = read_csv_chips(f"gates&netlists/chip_{chip}/print_{chip}.csv", board)
+    netlist = read_csv_netlist(f"gates&netlists/chip_{chip}/netlist_{net}.csv")
+    netlist_routes = find_routes(chip_list, netlist, board)
+    create_grid(chip_list, netlist_routes)
+
     create_output(netlist_routes, chip, net)
 
 
