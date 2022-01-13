@@ -109,7 +109,7 @@ def costs(netlist):
 
 
 def create_output(netlist_routes, chip, net):
-    with open("gates&netlists/chip_0/output.csv", "w", newline="") as f:
+    with open(f"gates&netlists/chip_{chip}/output.csv", "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["net", "wires"])
 
@@ -138,11 +138,11 @@ class Line:
 
 
 def main(chip, net):
-    chip_list = read_csv_chips(f"gates&netlists/chip_{chip}/print_0.csv")
+    chip_list = read_csv_chips(f"gates&netlists/chip_{chip}/print_{chip}.csv")
     netlist = read_csv_netlist(f"gates&netlists/chip_{chip}/netlist_{net}.csv")
     netlist_routes = find_routes(chip_list, netlist)
     create_grid(chip_list, netlist_routes)
-
+    
     create_output(netlist_routes, chip, net)
 
 
