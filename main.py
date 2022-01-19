@@ -97,17 +97,26 @@ def find_random_route(start_coordinate, end_coordinate, chips_dict, min_x, max_x
     # gets list of chips not on start and end coordinate
     invalid_chip_coords = list(chips_dict.values())
     invalid_chip_coords.remove(end_coordinate)
-    
+
     while current_coordinate != end_coordinate:
         # get all valid directions
         choices = valid_directions(current_coordinate, invalid_chip_coords, route, min_x, max_x, min_y, max_y)
-
+        
         # update current coord with random choice
-        current_coordinate = random.choice(choices)
+        if choices:
+            current_coordinate = random.choice(choices)
+        # if there are no choices left, get directions for the previous coord, remove the bad coord and remove it from the route
+        else:
+            while not choices:
+                choices = valid_directions(route[-2], invalid_chip_coords, route, min_x, max_x, min_y, max_y)
+                route.remove(current_coordinate)
+                choices.remove(current_coordinate)
+                
+            current_coordinate = random.choice(choices)
 
         # add coord to route
         route.append(current_coordinate)
-        
+
     return route
 
 
@@ -186,7 +195,14 @@ def create_grid(chips_dict, netlist_routes):
 
     # plot
     plt.scatter(x_list, y_list, zorder=2, s=300)
+
+    # colors = []
+    # for line in x_lines:
+    #     color = (np.random.rand(3,), np.random.rand(3,), np.random.rand(3,))
+    #     colors.append(color)
+
     plt.step(x_lines, y_lines, linewidth=2.5)
+
     for i, txt in enumerate(id_list):
         plt.annotate(txt, (x_list[i], y_list[i]), ha="center", va="center")
 
