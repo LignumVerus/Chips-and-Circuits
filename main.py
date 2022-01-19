@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 import random
+from copy import deepcopy
+
 
 
 def read_csv_chips(filename, board):
@@ -92,28 +94,29 @@ def find_random_route(
     """
     creates random route
     """
-    route = []
-    route.append(start_coordinate)
-
-    current_coordinate = start_coordinate
-
+    routes = []
+    routes.append([start_coordinate])
+    
     # gets list of chips not on start and end coordinate
     invalid_chip_coords = list(chips_dict.values())
     invalid_chip_coords.remove(end_coordinate)
 
-    while current_coordinate != end_coordinate:
-        # get all valid directions
+    while len(routes) != 0:
+        route =  routes.pop()
+        
+        current_coordinate = route[-1]
         choices = valid_directions(
             current_coordinate, invalid_chip_coords, route, min_x, max_x, min_y, max_y
         )
-
-        # update current coord with random choice
-        current_coordinate = random.choice(choices)
-
-        # add coord to route
-        route.append(current_coordinate)
-
-    return route
+        for x in choices:
+            w = deepcopy(route)
+            w.append(x)
+            
+            if x == end_coordinate:
+                print(start_coordinate, end_coordinate, w)
+                return w
+            
+            routes.append(w)
 
 
 def valid_directions(
@@ -129,6 +132,8 @@ def valid_directions(
         current_coordinate[0] - 1 >= min_x
         and (current_coordinate[0] - 1, current_coordinate[1])
         not in invalid_chip_coords
+        and (current_coordinate[0] - 1, current_coordinate[1])
+        not in route
     ):
         choices.append((current_coordinate[0] - 1, current_coordinate[1]))
 
@@ -137,6 +142,8 @@ def valid_directions(
         current_coordinate[0] + 1 <= max_x
         and (current_coordinate[0] + 1, current_coordinate[1])
         not in invalid_chip_coords
+        and (current_coordinate[0] + 1, current_coordinate[1])
+        not in route
     ):
         choices.append((current_coordinate[0] + 1, current_coordinate[1]))
 
@@ -145,6 +152,8 @@ def valid_directions(
         current_coordinate[1] - 1 >= min_y
         and (current_coordinate[0], current_coordinate[1] - 1)
         not in invalid_chip_coords
+        and (current_coordinate[0], current_coordinate[1] - 1)
+        not in route
     ):
         choices.append((current_coordinate[0], current_coordinate[1] - 1))
 
@@ -153,6 +162,8 @@ def valid_directions(
         current_coordinate[1] + 1 <= max_y
         and (current_coordinate[0], current_coordinate[1] + 1)
         not in invalid_chip_coords
+        and (current_coordinate[0], current_coordinate[1] + 1)
+        not in route
     ):
         choices.append((current_coordinate[0], current_coordinate[1] + 1))
 
