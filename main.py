@@ -148,7 +148,8 @@ def valid_directions(
     if (
         current_coordinate[0] - 1 >= min_x
         and (current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2])
-        not in invalid_chip_coords
+        not in invalid_chip_coords 
+        #and (current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2]) not in route
     ):
         choices.append((current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2]))
 
@@ -156,7 +157,8 @@ def valid_directions(
     if (
         current_coordinate[0] + 1 <= max_x
         and (current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2])
-        not in invalid_chip_coords
+        not in invalid_chip_coords 
+        #and (current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2]) not in route
     ):
         choices.append((current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2]))
 
@@ -164,7 +166,8 @@ def valid_directions(
     if (
         current_coordinate[1] - 1 >= min_y
         and (current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2])
-        not in invalid_chip_coords
+        not in invalid_chip_coords 
+        #and (current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2]) not in route
     ):
         choices.append((current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2]))
 
@@ -173,6 +176,7 @@ def valid_directions(
         current_coordinate[1] + 1 <= max_y
         and (current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2])
         not in invalid_chip_coords 
+        #and (current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2]) not in route
     ):
         choices.append((current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2]))
 
@@ -180,7 +184,8 @@ def valid_directions(
     if (
         current_coordinate[2] - 1 >= min_z
         and (current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1)
-        not in invalid_chip_coords
+        not in invalid_chip_coords 
+        #and (current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1) not in route
     ):
         choices.append((current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1))
 
@@ -188,7 +193,8 @@ def valid_directions(
     if (
         current_coordinate[2] + 1 <= max_z
         and (current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1)
-        not in invalid_chip_coords
+        not in invalid_chip_coords 
+        #and (current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1) not in route
     ):
         choices.append((current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1))
 
