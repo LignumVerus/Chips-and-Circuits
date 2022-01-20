@@ -13,6 +13,7 @@ from matplotlib.pyplot import cm
 import numpy as np
 import sys
 import random
+from scipy.spatial.distance import cityblock
 
 
 def read_csv_chips(filename, board):
@@ -68,6 +69,8 @@ def find_routes(chips_dict, netlist):
     # gets board size
     min_x, max_x, min_y, max_y, min_z, max_z = get_board_size(chips_dict)
 
+    netlist = shorted_manhattan_distance(chips_dict, netlist)
+
     # find from which to which coordinate the line has to go
     for i, line in enumerate(netlist):
         start_coordinate = chips_dict[line.start]
@@ -78,6 +81,22 @@ def find_routes(chips_dict, netlist):
 
     # board.add_lines(route1, route2)
     return netlist
+
+def shorted_manhattan_distance(chips_dict, netlist):
+    temp = []
+
+    for line in netlist:
+        start_coordinate = chips_dict[line.start]
+        end_coordinate = chips_dict[line.end]
+
+        a = [start_coordinate[0], start_coordinate[1], start_coordinate[2]]  
+        b = [end_coordinate[0], end_coordinate[1], end_coordinate[2]]  
+
+        temp.append((line, cityblock(a, b)))
+    
+    temp = sorted(temp, key=lambda x: x[1])
+
+    return [x[0] for x in temp]
 
     # find_route(x_start, y_start x_end, y_end)
     # pass
