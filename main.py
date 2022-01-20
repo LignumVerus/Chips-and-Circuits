@@ -14,6 +14,8 @@ import numpy as np
 import sys
 import random
 from scipy.spatial.distance import cityblock
+import queue
+import copy
 
 
 def read_csv_chips(filename, board):
@@ -62,7 +64,7 @@ def read_csv_netlist(filename):
     return netlist
 
 
-def find_routes(chips_dict, netlist):
+def find_routes(chips_dict, netlist, board):
     """
     needs to return list of Line
     """
@@ -72,15 +74,17 @@ def find_routes(chips_dict, netlist):
     netlist = shorted_manhattan_distance(chips_dict, netlist)
 
     # find from which to which coordinate the line has to go
-    for i, line in enumerate(netlist):
+    for line in netlist:
         start_coordinate = chips_dict[line.start]
         end_coordinate = chips_dict[line.end]
         line.route = find_random_route(
-            start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z
+            start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board
         )
+        board.lines.append(x for x in line.route)
 
     # board.add_lines(route1, route2)
     return netlist
+
 
 def shorted_manhattan_distance(chips_dict, netlist):
     temp = []
@@ -98,65 +102,88 @@ def shorted_manhattan_distance(chips_dict, netlist):
 
     return [x[0] for x in temp]
 
+
+def is_not_collision(current_coordinate, board):
+    return current_coordinate not in board.lines
+    
     # find_route(x_start, y_start x_end, y_end)
     # pass
 
-
 # algorithm route
-# prevent self collisions
-# prevent collisions with other routes
-# give crossing last priority (except when it would be longer than 300 steps?)
+# *prevent self collisions
+# *prevent collisions with other routes
+# give crossing last priority (except when it would be longer than 300 steps?) (currently forbidden)
 # prioritize x and y directions over z directions
-# sort netlist on manhattan distance
-# place shortest manhattan distance routes first, then increasingly longer?
-# xmax-xmin + ymax-ymin + zmax-zmin
+# *sort netlist on manhattan distance
+# *place shortest manhattan distance routes first, then increasingly longer?
+# *xmax-xmin + ymax-ymin + zmax-zmin
 # 
 
 def find_route(start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z):
+
     pass
 
 
 def find_random_route(
-    start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z
+    start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board
 ):
     """
     creates random route
     """
-    route = []
-    route.append(start_coordinate)
+    # route = []
+    # route.append(start_coordinate)
 
-    current_coordinate = start_coordinate
-
-    # gets list of chips not on start and end coordinate
+        # gets list of chips not on start and end coordinate
     invalid_chip_coords = list(chips_dict.values())
     invalid_chip_coords.remove(end_coordinate)
 
-    while current_coordinate != end_coordinate:
-        # get all valid directions
-        choices = valid_directions(
-            current_coordinate, invalid_chip_coords, route, min_x, max_x, min_y, max_y, min_z, max_z
-        )
+    q = queue.Queue()
 
-        # update current coord with random choice
-        if choices:
-            current_coordinate = random.choice(choices)
-        # if there are no choices left, get directions for the previous coord, remove the bad coord and remove it from the route
-        else:
-            while not choices:
-                choices = valid_directions(route[-2], invalid_chip_coords, route, min_x, max_x, min_y, max_y, min_z, max_z)
-                route.remove(current_coordinate)
-                choices.remove(current_coordinate)
-                
-            current_coordinate = random.choice(choices)
+    q.put(start_coordinate)
+    current_coordinate = start_coordinate
 
-        # add coord to route
-        route.append(current_coordinate)
+    while not q.empty():
+        route = q.get()
+
+        for i in valid_directions(
+            current_coordinate, invalid_chip_coords, route, min_x, max_x, min_y, max_y, min_z, max_z, board
+        ):
+            child = copy.deepcopy(route)
+            child += i
+
+            if i == end_coordinate:
+                return child
+
+            q.put(child)
+
+    # while current_coordinate != end_coordinate:
+
+
+    #     # get all valid directions
+    #     choices = 
+
+    #     # update current coord with random choice
+    #     if choices:
+    #         print("full", choices)
+    #         current_coordinate = random.choice(choices)
+    #     # if there are no choices left, get directions for the previous coord, remove the bad coord and remove it from the route
+    #     else:
+    #         while not choices:
+    #             choices = valid_directions(route[-2], invalid_chip_coords, route, min_x, max_x, min_y, max_y, min_z, max_z, board)
+    #             print("empty", choices)
+    #             route.remove(current_coordinate)
+    #             choices.remove(current_coordinate)
+
+    #         current_coordinate = random.choice(choices)
+
+    #     # add coord to route
+    #     route.append(current_coordinate)
 
     return route
 
 
 def valid_directions(
-    current_coordinate, invalid_chip_coords, route, min_x, max_x, min_y, max_y, min_z, max_z
+    current_coordinate, invalid_chip_coords, route, min_x, max_x, min_y, max_y, min_z, max_z, board
 ):
     """
     finds all possible directions from point in grid
@@ -168,7 +195,8 @@ def valid_directions(
         current_coordinate[0] - 1 >= min_x
         and (current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2])
         not in invalid_chip_coords 
-        #and (current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2]) not in route
+        and is_not_collision((current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2]), board)
+        and (current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2]) not in route
     ):
         choices.append((current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2]))
 
@@ -176,8 +204,9 @@ def valid_directions(
     if (
         current_coordinate[0] + 1 <= max_x
         and (current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2])
-        not in invalid_chip_coords 
-        #and (current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2]) not in route
+        not in invalid_chip_coords
+        and is_not_collision((current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2]), board)
+        and (current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2]) not in route
     ):
         choices.append((current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2]))
 
@@ -185,8 +214,9 @@ def valid_directions(
     if (
         current_coordinate[1] - 1 >= min_y
         and (current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2])
-        not in invalid_chip_coords 
-        #and (current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2]) not in route
+        not in invalid_chip_coords
+        and is_not_collision((current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2]), board)
+        and (current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2]) not in route
     ):
         choices.append((current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2]))
 
@@ -194,8 +224,9 @@ def valid_directions(
     if (
         current_coordinate[1] + 1 <= max_y
         and (current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2])
-        not in invalid_chip_coords 
-        #and (current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2]) not in route
+        not in invalid_chip_coords
+        and is_not_collision((current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2]), board)
+        and (current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2]) not in route
     ):
         choices.append((current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2]))
 
@@ -203,8 +234,9 @@ def valid_directions(
     if (
         current_coordinate[2] - 1 >= min_z
         and (current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1)
-        not in invalid_chip_coords 
-        #and (current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1) not in route
+        not in invalid_chip_coords
+        and is_not_collision((current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1), board)
+        and (current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1) not in route
     ):
         choices.append((current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1))
 
@@ -212,8 +244,9 @@ def valid_directions(
     if (
         current_coordinate[2] + 1 <= max_z
         and (current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1)
-        not in invalid_chip_coords 
-        #and (current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1) not in route
+        not in invalid_chip_coords
+        and is_not_collision((current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1), board)
+        and (current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1) not in route
     ):
         choices.append((current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1))
 
@@ -350,9 +383,10 @@ class Line:
 
 
 class Board:
-    def __init__(self):
+    def __init__(self, lines):
         # {(1,1): (chip_id, [line_id1, line_id2]}
-        self.board = {}
+        # self.board = {}
+        self.lines = lines
 
     # add chip to dictionary with coordinates as key
     def add_chip(self, chip_x, chip_y,chip_z):
@@ -371,10 +405,10 @@ class Board:
 
 def main(chip, net):
     # create a board
-    board = Board()
+    board = Board([])
     chips_dict = read_csv_chips(f"gates&netlists/chip_{chip}/print_{chip}.csv", board)
     netlist = read_csv_netlist(f"gates&netlists/chip_{chip}/netlist_{net}.csv")
-    netlist_routes = find_routes(chips_dict, netlist)
+    netlist_routes = find_routes(chips_dict, netlist, board)
     create_grid(chips_dict, netlist_routes)
 
     create_output(netlist_routes, chip, net)
