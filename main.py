@@ -8,6 +8,7 @@
 """
 import csv
 import matplotlib.pyplot as plt
+from matplotlib.pyplot import cm
 import numpy as np
 import sys
 import random
@@ -61,7 +62,7 @@ def read_csv_netlist(filename):
 
 def find_routes(chips_dict, netlist):
     """
-    Needs to return list of Line
+    needs to return list of Line
     """
     # gets board size
     min_x, max_x, min_y, max_y = get_board_size(chips_dict)
@@ -129,7 +130,7 @@ def valid_directions(
     current_coordinate, invalid_chip_coords, route, min_x, max_x, min_y, max_y
 ):
     """
-    Finds all possible directions from point in grid
+    finds all possible directions from point in grid
     """
     choices = []
 
@@ -206,22 +207,19 @@ def create_grid(chips_dict, netlist_routes):
         x_list.append(coordinate[0])
         y_list.append(coordinate[1])
 
-    x_lines = []
-    y_lines = []
+    
     for lines in netlist_routes:
+        x_lines = []
+        y_lines = []
+
         for line in lines.route:
             x_lines.append(line[0])
             y_lines.append(line[1])
 
+        plt.step(x_lines, y_lines, linewidth=2.5)
+
     # plot
     plt.scatter(x_list, y_list, zorder=2, s=300)
-
-    # colors = []
-    # for line in x_lines:
-    #     color = (np.random.rand(3,), np.random.rand(3,), np.random.rand(3,))
-    #     colors.append(color)
-
-    plt.step(x_lines, y_lines, linewidth=2.5)
 
     for i, txt in enumerate(id_list):
         plt.annotate(txt, (x_list[i], y_list[i]), ha="center", va="center")
