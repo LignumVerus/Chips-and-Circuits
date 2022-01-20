@@ -8,6 +8,7 @@
 """
 import csv
 import matplotlib.pyplot as plt
+#from  import mplot3d
 from matplotlib.pyplot import cm
 import numpy as np
 import sys
@@ -28,14 +29,14 @@ def read_csv_chips(filename, board):
         # creates chips with id, x coordinate and y coordinate
         for row in csvreader:
             # Chip(id, x, y), DOET NU NIKS!!
-            chip = Chip(row[0], row[1], row[2])
+            chip = Chip(row[0], row[1], row[2], 0)
             # chip_list.append(chip)
 
             # add x and y coordinate to board
-            board.add_chip(chip.x, chip.y)
+            board.add_chip(chip.x, chip.y, 0)
 
             # Make a dictionary of all the chips, with the id as the key and tuple of coordinates as value
-            chips_dict[row[0]] = (chip.x, chip.y)
+            chips_dict[row[0]] = (chip.x, chip.y, 0)
 
     return chips_dict
 
@@ -51,7 +52,7 @@ def read_csv_netlist(filename):
 
         for number, row in enumerate(csvreader):
             try:
-                # Line(id, chip_id_1, chip_id_2)
+                # Line(id, chip_id_1, chip_id_2, route)
                 line = Line(number, row[0], row[1], [])
                 netlist.append(line)
             except IndexError:
@@ -65,14 +66,14 @@ def find_routes(chips_dict, netlist):
     needs to return list of Line
     """
     # gets board size
-    min_x, max_x, min_y, max_y = get_board_size(chips_dict)
+    min_x, max_x, min_y, max_y, min_z, max_z = get_board_size(chips_dict)
 
     # find from which to which coordinate the line has to go
     for i, line in enumerate(netlist):
         start_coordinate = chips_dict[line.start]
         end_coordinate = chips_dict[line.end]
         line.route = find_random_route(
-            start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y
+            start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z
         )
 
     # board.add_lines(route1, route2)
@@ -83,12 +84,21 @@ def find_routes(chips_dict, netlist):
 
 
 # algorithm route
-# def find_route(x_start, y_start x_end, y_end):
-#     pass
+# prevent self collisions
+# prevent collisions with other routes
+# give crossing last priority (except when it would be longer than 300 steps?)
+# prioritize x and y directions over z directions
+# sort netlist on manhattan distance
+# place shortest manhattan distance routes first, then increasingly longer?
+# xmax-xmin + ymax-ymin + zmax-zmin
+# 
+
+def find_route(start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z):
+    pass
 
 
 def find_random_route(
-    start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y
+    start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z
 ):
     """
     creates random route
@@ -105,7 +115,7 @@ def find_random_route(
     while current_coordinate != end_coordinate:
         # get all valid directions
         choices = valid_directions(
-            current_coordinate, invalid_chip_coords, route, min_x, max_x, min_y, max_y
+            current_coordinate, invalid_chip_coords, route, min_x, max_x, min_y, max_y, min_z, max_z
         )
 
         # update current coord with random choice
@@ -114,7 +124,7 @@ def find_random_route(
         # if there are no choices left, get directions for the previous coord, remove the bad coord and remove it from the route
         else:
             while not choices:
-                choices = valid_directions(route[-2], invalid_chip_coords, route, min_x, max_x, min_y, max_y)
+                choices = valid_directions(route[-2], invalid_chip_coords, route, min_x, max_x, min_y, max_y, min_z, max_z)
                 route.remove(current_coordinate)
                 choices.remove(current_coordinate)
                 
@@ -127,44 +137,60 @@ def find_random_route(
 
 
 def valid_directions(
-    current_coordinate, invalid_chip_coords, route, min_x, max_x, min_y, max_y
+    current_coordinate, invalid_chip_coords, route, min_x, max_x, min_y, max_y, min_z, max_z
 ):
     """
     finds all possible directions from point in grid
     """
     choices = []
 
-    # left
+    # west
     if (
         current_coordinate[0] - 1 >= min_x
-        and (current_coordinate[0] - 1, current_coordinate[1])
+        and (current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2])
         not in invalid_chip_coords
     ):
-        choices.append((current_coordinate[0] - 1, current_coordinate[1]))
+        choices.append((current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2]))
 
-    # right
+    # east
     if (
         current_coordinate[0] + 1 <= max_x
-        and (current_coordinate[0] + 1, current_coordinate[1])
+        and (current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2])
         not in invalid_chip_coords
     ):
-        choices.append((current_coordinate[0] + 1, current_coordinate[1]))
+        choices.append((current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2]))
+
+    # north
+    if (
+        current_coordinate[1] - 1 >= min_y
+        and (current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2])
+        not in invalid_chip_coords
+    ):
+        choices.append((current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2]))
+
+    # south
+    if (
+        current_coordinate[1] + 1 <= max_y
+        and (current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2])
+        not in invalid_chip_coords 
+    ):
+        choices.append((current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2]))
 
     # down
     if (
-        current_coordinate[1] - 1 >= min_y
-        and (current_coordinate[0], current_coordinate[1] - 1)
+        current_coordinate[2] - 1 >= min_z
+        and (current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1)
         not in invalid_chip_coords
     ):
-        choices.append((current_coordinate[0], current_coordinate[1] - 1))
+        choices.append((current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1))
 
     # up
     if (
-        current_coordinate[1] + 1 <= max_y
-        and (current_coordinate[0], current_coordinate[1] + 1)
+        current_coordinate[2] + 1 <= max_z
+        and (current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1)
         not in invalid_chip_coords
     ):
-        choices.append((current_coordinate[0], current_coordinate[1] + 1))
+        choices.append((current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1))
 
     # check if coord is backtracking
     if len(route) > 2:
@@ -181,6 +207,7 @@ def get_board_size(chips_dict):
     """
     gets max and min coordinates
     """
+
     x_list = []
     y_list = []
 
@@ -193,40 +220,48 @@ def get_board_size(chips_dict):
     min_y = min(y_list) - 1
     max_y = max(y_list) + 1
 
-    return min_x, max_x, min_y, max_y
+    # number of 3D layers is hardcoded (always 8)
+    return min_x, max_x, min_y, max_y, 0, 7
 
 
 def create_grid(chips_dict, netlist_routes):
     """
     visualizes grid
     """
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    
     id_list = chips_dict.keys()
     x_list = []
     y_list = []
+    z_list = []
     for coordinate in chips_dict.values():
         x_list.append(coordinate[0])
         y_list.append(coordinate[1])
+        z_list.append(coordinate[2])
 
     
     for lines in netlist_routes:
         x_lines = []
         y_lines = []
+        z_lines = []
 
         for line in lines.route:
             x_lines.append(line[0])
             y_lines.append(line[1])
+            z_lines.append(line[2])
 
-        plt.step(x_lines, y_lines, linewidth=2.5)
+        ax.step(x_lines, y_lines, z_lines, linewidth=2.5)
 
     # plot
-    plt.scatter(x_list, y_list, zorder=2, s=300)
+    ax.scatter(x_list, y_list, z_list, zorder=2, s=300)
 
     for i, txt in enumerate(id_list):
-        plt.annotate(txt, (x_list[i], y_list[i]), ha="center", va="center")
+        ax.annotate(txt, (x_list[i], y_list[i]), ha="center", va="center")
 
     plt.xlim([min(x_list) - 1, max(x_list) + 1])
     plt.ylim([min(y_list) - 1, max(y_list) + 1])
-    plt.grid(visible=True, zorder=0)
+    ax.grid(visible=True, zorder=0)
     plt.title("Circuit Board Grid")
     plt.tight_layout()
     plt.savefig("plots/plot1.png")
@@ -274,10 +309,11 @@ def create_output(netlist_routes, chip, net):
 
 # chip class that has a function that
 class Chip:
-    def __init__(self, id, x, y):
+    def __init__(self, id, x, y, z):
         self.id = id
         self.x = int(x)
         self.y = int(y)
+        self.z = int(z)
 
 
 class Line:
@@ -294,7 +330,7 @@ class Board:
         self.board = {}
 
     # add chip to dictionary with coordinates as key
-    def add_chip(self, chip_x, chip_y):
+    def add_chip(self, chip_x, chip_y,chip_z):
         # TODO: add chip to dictonary
         # if coordinate not in dict, add to dict and add chip
         # else update entry
