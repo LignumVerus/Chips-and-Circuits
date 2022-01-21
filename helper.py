@@ -9,7 +9,7 @@
 from scipy.spatial.distance import cityblock
 
 
-def shorted_manhattan_distance(chips_dict, netlist):
+def sorted_manhattan_distance(chips_dict, netlist):
     temp = []
 
     for line in netlist:
@@ -25,6 +25,11 @@ def shorted_manhattan_distance(chips_dict, netlist):
 
     return [x[0] for x in temp]
 
+
+def manhattan_distance(start, end):
+    a = [start[0], start[1], start[2]]
+    b = [end[0], end[1], end[2]]
+    return cityblock(a, b)
 
 def is_not_collision(current_coordinate, board):
     return current_coordinate not in board.lines
