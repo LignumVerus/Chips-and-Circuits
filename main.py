@@ -36,6 +36,12 @@ def find_routes(chips_dict, netlist, board):
         )
 
         board.lines.extend(line.route)
+    
+    # hier moet iets?
+    # Herhaal:
+        # Doe een kleine random aanpassing
+        # Als de state is verslechterd:
+            # Maak de aanpassing ongedaan
 
     # board.add_lines(route1, route2)
     return netlist
