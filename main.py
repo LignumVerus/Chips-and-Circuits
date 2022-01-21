@@ -65,61 +65,35 @@ def find_random_route(
     """
     creates random route
     """
-    # route = []
-    # route.append(start_coordinate)
+    route = []
+    route.append(start_coordinate)
+    current_coordinate = start_coordinate
 
     # gets list of chips not on start and end coordinate
     invalid_chip_coords = list(chips_dict.values())
     invalid_chip_coords.remove(end_coordinate)
 
-    q = queue.Queue()
-    q.put([start_coordinate])
+    while current_coordinate != end_coordinate:
 
-    # g = cost? of the route travelled
-    # h = manhattan distance between current coord and end coord
-    # f = g + h (total cost)
+        # get all valid directions
+        choices = valid_directions(current_coordinate, invalid_chip_coords, route, min_x, max_x, min_y, max_y, min_z, max_z, board)
 
-    while not q.empty():
-        route = q.get()
+        # update current coord with random choice
+        if choices:
+            current_coordinate = random.choice(choices)
+        # if there are no choices left, get directions for the previous coord, remove the bad coord and remove it from the route
+        else:
+            while not choices:
+                choices = valid_directions(route[-2], invalid_chip_coords, route, min_x, max_x, min_y, max_y, min_z, max_z, board)
+                route.remove(current_coordinate)
+                choices.remove(current_coordinate)
 
-        for i in valid_directions(
-            route[-1], invalid_chip_coords, route, min_x, max_x, min_y, max_y, min_z, max_z, board
-        ):
-            child = copy.deepcopy(route)
-            child.append(i)
+            current_coordinate = random.choice(choices)
 
-            if i == end_coordinate:
-                return child
+        # add coord to route
+        route.append(current_coordinate)
 
-            q.put(child)
-
-    # TO DO: error melding!
-    return False
-
-    # while current_coordinate != end_coordinate:
-
-
-    #     # get all valid directions
-    #     choices = 
-
-    #     # update current coord with random choice
-    #     if choices:
-    #         print("full", choices)
-    #         current_coordinate = random.choice(choices)
-    #     # if there are no choices left, get directions for the previous coord, remove the bad coord and remove it from the route
-    #     else:
-    #         while not choices:
-    #             choices = valid_directions(route[-2], invalid_chip_coords, route, min_x, max_x, min_y, max_y, min_z, max_z, board)
-    #             print("empty", choices)
-    #             route.remove(current_coordinate)
-    #             choices.remove(current_coordinate)
-
-    #         current_coordinate = random.choice(choices)
-
-    #     # add coord to route
-    #     route.append(current_coordinate)
-
-    # return route
+    return route
 
 def valid_directions(
     current_coordinate, invalid_chip_coords, route, min_x, max_x, min_y, max_y, min_z, max_z, board
@@ -139,7 +113,7 @@ def valid_directions(
         # can't collide with another line
         # and is_not_collision((current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2]), board)
         # can't collide with own route
-        and (current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2]) not in route
+        # and (current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2]) not in route
     ):
         choices.append((current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2]))
 
@@ -149,7 +123,7 @@ def valid_directions(
         and (current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2])
         not in invalid_chip_coords
         # and is_not_collision((current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2]), board)
-        and (current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2]) not in route
+        # and (current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2]) not in route
     ):
         choices.append((current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2]))
 
@@ -159,7 +133,7 @@ def valid_directions(
         and (current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2])
         not in invalid_chip_coords
         # and is_not_collision((current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2]), board)
-        and (current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2]) not in route
+        # and (current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2]) not in route
     ):
         choices.append((current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2]))
 
@@ -169,7 +143,7 @@ def valid_directions(
         and (current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2])
         not in invalid_chip_coords
         # and is_not_collision((current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2]), board)
-        and (current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2]) not in route
+        # and (current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2]) not in route
     ):
         choices.append((current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2]))
 
@@ -179,7 +153,7 @@ def valid_directions(
         and (current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1)
         not in invalid_chip_coords
         # and is_not_collision((current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1), board)
-        and (current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1) not in route
+        # and (current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1) not in route
     ):
         choices.append((current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1))
 
@@ -189,7 +163,7 @@ def valid_directions(
         and (current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1)
         not in invalid_chip_coords
         # and is_not_collision((current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1), board)
-        and (current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1) not in route
+        # and (current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1) not in route
     ):
         choices.append((current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1))
 
