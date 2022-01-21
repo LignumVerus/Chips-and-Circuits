@@ -8,6 +8,15 @@
 """
 from scipy.spatial.distance import cityblock
 
+def route_costs(board, route):
+    n = len(route)
+    k = 0
+
+    for coordinate in route:
+        if coordinate in board.lines:
+            k += 1
+
+    return n + 300 * k
 
 def sorted_manhattan_distance(chips_dict, netlist):
     temp = []
