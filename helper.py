@@ -9,12 +9,16 @@
 from scipy.spatial.distance import cityblock
 
 def route_costs(board, route):
-    n = len(route)
-    k = 0
+    n = len(route) - 1
 
-    for coordinate in route:
-        if coordinate in board.lines:
-            k += 1
+    counts = dict()
+    for coordinate in board.lines:
+        if coordinate in counts:
+            counts[coordinate] += 1
+        else:
+            counts[coordinate] = 1
+
+    k = sum(value - 1 for value in counts.values())
 
     return n + 300 * k
 
@@ -67,7 +71,7 @@ def get_board_size(chips_dict):
 
 def costs(netlist):
     """
-    computes costs
+    computes costs of whole netlist
     """
     n = 0
     route_coords = []

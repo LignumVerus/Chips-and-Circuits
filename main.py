@@ -35,7 +35,7 @@ def find_routes(chips_dict, netlist, board):
             start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board
         )
 
-        board.lines.extend(line.route)
+        board.lines.extend(line.route[1:-1])
 
     # board.add_lines(route1, route2)
     return netlist
@@ -82,6 +82,8 @@ def find_random_route(
     while not q.empty():
         route = q.get()
 
+        costs = []
+
         for i in valid_directions(
             route[-1], invalid_chip_coords, route, min_x, max_x, min_y, max_y, min_z, max_z, board
         ):
@@ -89,9 +91,21 @@ def find_random_route(
             child.append(i)
 
             if i == end_coordinate:
+                print(len(board.lines))
                 return child
 
-            q.put(child)
+            g = route_costs(board, route)
+            h = manhattan_distance(i, end_coordinate)
+            f = g + h
+
+            costs.append((child, f))
+
+        # put child with lowest cost
+        best_child = sorted(costs, key=lambda x: x[1])[0]
+        best_cost = best_child[1]
+        best_child_path = best_child[0]
+
+        q.put(best_child_path)
 
     # TO DO: error melding!
     return False
@@ -137,7 +151,7 @@ def valid_directions(
         and (current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2])
         not in invalid_chip_coords
         # can't collide with another line
-        # and is_not_collision((current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2]), board)
+        and is_not_collision((current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2]), board)
         # can't collide with own route
         and (current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2]) not in route
     ):
@@ -148,7 +162,7 @@ def valid_directions(
         current_coordinate[0] + 1 <= max_x
         and (current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2])
         not in invalid_chip_coords
-        # and is_not_collision((current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2]), board)
+        and is_not_collision((current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2]), board)
         and (current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2]) not in route
     ):
         choices.append((current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2]))
@@ -158,7 +172,7 @@ def valid_directions(
         current_coordinate[1] - 1 >= min_y
         and (current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2])
         not in invalid_chip_coords
-        # and is_not_collision((current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2]), board)
+        and is_not_collision((current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2]), board)
         and (current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2]) not in route
     ):
         choices.append((current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2]))
@@ -168,7 +182,7 @@ def valid_directions(
         current_coordinate[1] + 1 <= max_y
         and (current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2])
         not in invalid_chip_coords
-        # and is_not_collision((current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2]), board)
+        and is_not_collision((current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2]), board)
         and (current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2]) not in route
     ):
         choices.append((current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2]))
@@ -178,7 +192,7 @@ def valid_directions(
         current_coordinate[2] - 1 >= min_z
         and (current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1)
         not in invalid_chip_coords
-        # and is_not_collision((current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1), board)
+        and is_not_collision((current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1), board)
         and (current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1) not in route
     ):
         choices.append((current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1))
@@ -188,7 +202,7 @@ def valid_directions(
         current_coordinate[2] + 1 <= max_z
         and (current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1)
         not in invalid_chip_coords
-        # and is_not_collision((current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1), board)
+        and is_not_collision((current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1), board)
         and (current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1) not in route
     ):
         choices.append((current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1))
