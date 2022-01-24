@@ -47,7 +47,7 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
         if len(line.route) == 0:
             not_found += 1
 
-    # print("not found: ", not_found)
+    print("not found: ", not_found)
 
 
     print("START OPTIMIZING")
@@ -58,11 +58,11 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
 
         current_route = line.route
 
-        better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
+        better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
         
         while len(better) < len(current_route):
             current_route = better
-            better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
+            better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
         
         optimized_routes += 1
         print(optimized_routes)
@@ -87,7 +87,7 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
 # *xmax-xmin + ymax-ymin + zmax-zmin
 # 
 
-def optimize_route(route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board):
+def optimize_route(route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board):
     for i, point_one in enumerate(route):
         # idee: laat punt 2 bij de laatste beginnen
         for j, point_two in enumerate(route[i:]):
@@ -95,7 +95,7 @@ def optimize_route(route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, 
             route_distance = j - i
 
             if distance > 1 and route_distance > distance:
-                new_route = find_random_route(point_one, point_two, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
+                new_route = find_random_route(point_one, point_two, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
 
                 if len(new_route) < route_distance and len(new_route) > 0:
 
