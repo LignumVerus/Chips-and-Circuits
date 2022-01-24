@@ -27,37 +27,51 @@ def find_routes(chips_dict, netlist, board):
     min_x, max_x, min_y, max_y, min_z, max_z = get_board_size(chips_dict)
 
     netlist = sorted_manhattan_distance(chips_dict, netlist)
-    print(len(netlist))
 
+    print(len(netlist))
     count = 0
     not_found = 0
+    
     # find from which to which coordinate the line has to go
     for line in netlist:
         start_coordinate = chips_dict[line.start]
         end_coordinate = chips_dict[line.end]
 
-        current_route = find_random_route(
+        line.route = find_random_route(
             start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board
         )
 
-        better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
-        
-        while len(better) < len(current_route):
-            print("HET WERKT!!!")
-            current_route = better
-            better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
-        
-        line.route = current_route
-        
+        board.lines.extend(line.route[1:-1])
+
         count += 1
         print(count)
         if len(line.route) == 0:
             not_found += 1
 
-        board.lines.extend(line.route[1:-1])
+    print("not found: ", not_found)
+
+
+    print("START OPTIMIZING")
+    
+    optimized_routes = 0
+
+    for line in netlist: 
+
+        current_route = line.route
+
+        better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
+        
+        while len(better) < len(current_route):
+            current_route = better
+            better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
+        
+        optimized_routes += 1
+        print(optimized_routes)
+        line.route = current_route
+        
+        
 
     # board.add_lines(route1, route2)
-    print("not found: ", not_found)
     return netlist
 
     
@@ -75,7 +89,6 @@ def find_routes(chips_dict, netlist, board):
 # 
 
 def optimize_route(route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board):
-    print(route)
     for i, point_one in enumerate(route):
         # idee: laat punt 2 bij de laatste beginnen
         for j, point_two in enumerate(route[i:]):
@@ -163,6 +176,9 @@ def find_random_route(
                 return child
 
             g = route_costs(board, child)
+            # meer kosten als het op dezelfde laag blijft voor meer ruimte onderin
+            # meer kosten als de route dicht bij een andere lijn komt
+            # lijnen (random, langste, grootste afwijking met man_dis) weghalen, kijken of er dan een andere lijn wel kan
             h = manhattan_distance(i, end_coordinate)
             f = g + h
 
@@ -174,8 +190,7 @@ def find_random_route(
             best_child_path = best_child[0]
             q.put(best_child_path)
 
-    # TO DO: error melding!
-    print("NOT FOUND")
+    # TO DO: error melding! 
     return []
 
     # while current_coordinate != end_coordinate:
