@@ -6,6 +6,7 @@
 * Finn Peranovic 12740454
 * Rachel de Haan 12423254
 """
+from bcrypt import re
 import numpy as np
 import sys
 import random
@@ -26,18 +27,37 @@ def find_routes(chips_dict, netlist, board):
     min_x, max_x, min_y, max_y, min_z, max_z = get_board_size(chips_dict)
 
     netlist = sorted_manhattan_distance(chips_dict, netlist)
+    print(len(netlist))
 
+    count = 0
+    not_found = 0
     # find from which to which coordinate the line has to go
     for line in netlist:
         start_coordinate = chips_dict[line.start]
         end_coordinate = chips_dict[line.end]
-        line.route = find_random_route(
+
+        current_route = find_random_route(
             start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board
         )
+
+        better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
+        
+        while len(better) < len(current_route):
+            print("HET WERKT!!!")
+            current_route = better
+            better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
+        
+        line.route = current_route
+        
+        count += 1
+        print(count)
+        if len(line.route) == 0:
+            not_found += 1
 
         board.lines.extend(line.route[1:-1])
 
     # board.add_lines(route1, route2)
+    print("not found: ", not_found)
     return netlist
 
     
@@ -53,6 +73,52 @@ def find_routes(chips_dict, netlist, board):
 # *place shortest manhattan distance routes first, then increasingly longer?
 # *xmax-xmin + ymax-ymin + zmax-zmin
 # 
+
+def optimize_route(route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board):
+    print(route)
+    for i, point_one in enumerate(route):
+        # idee: laat punt 2 bij de laatste beginnen
+        for j, point_two in enumerate(route[i:]):
+            distance = manhattan_distance(point_one, point_two)
+            route_distance = j - i
+
+            if distance > 1 and route_distance > distance:
+                new_route = find_random_route(point_one, point_two, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
+
+                if len(new_route) < route_distance and len(new_route) > 0:
+
+                    if len(route[:i]) > 0 and len(route[j:]) > 0: 
+                        temp = route[:i]
+
+                        temp.extend(new_route)
+                        temp.extend(route[j + 1:])
+
+                        route = temp
+                    
+                    elif len(route[:i]) > 0:
+                        temp = route[:i]
+
+                        temp.extend(new_route)
+
+                        route = temp
+                    
+                    elif len(route[j:]) > 0:
+                        temp = route[j + 1:]
+                        
+                        new_route.extend(temp)
+
+                        route = new_route
+                    
+                    else:
+                        route = new_route
+                    
+                    return route
+    
+    return route
+            
+
+
+
 
 def find_route(start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z):
 
@@ -70,7 +136,9 @@ def find_random_route(
 
     # gets list of chips not on start and end coordinate
     invalid_chip_coords = list(chips_dict.values())
-    invalid_chip_coords.remove(end_coordinate)
+
+    if end_coordinate in invalid_chip_coords:
+        invalid_chip_coords.remove(end_coordinate)
 
     q = queue.Queue()
     q.put([start_coordinate])
@@ -91,24 +159,24 @@ def find_random_route(
             child.append(i)
 
             if i == end_coordinate:
-                print(len(board.lines))
+                # print(len(board.lines))
                 return child
 
-            g = route_costs(board, route)
+            g = route_costs(board, child)
             h = manhattan_distance(i, end_coordinate)
             f = g + h
 
             costs.append((child, f))
 
         # put child with lowest cost
-        best_child = sorted(costs, key=lambda x: x[1])[0]
-        best_cost = best_child[1]
-        best_child_path = best_child[0]
-
-        q.put(best_child_path)
+        if len(costs) > 0:
+            best_child = sorted(costs, key=lambda x: x[1])[0]
+            best_child_path = best_child[0]
+            q.put(best_child_path)
 
     # TO DO: error melding!
-    return False
+    print("NOT FOUND")
+    return []
 
     # while current_coordinate != end_coordinate:
 
