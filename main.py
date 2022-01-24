@@ -50,23 +50,23 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
     # print("not found: ", not_found)
 
 
-    # print("START OPTIMIZING")
+    print("START OPTIMIZING")
     
-    # optimized_routes = 0
+    optimized_routes = 0
 
-    # for line in netlist: 
+    for line in netlist: 
 
-    #     current_route = line.route
+        current_route = line.route
 
-    #     better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
+        better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
         
-    #     while len(better) < len(current_route):
-    #         current_route = better
-    #         better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
+        while len(better) < len(current_route):
+            current_route = better
+            better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
         
-    #     optimized_routes += 1
-    #     print(optimized_routes)
-    #     line.route = current_route
+        optimized_routes += 1
+        print(optimized_routes)
+        line.route = current_route
         
         
 

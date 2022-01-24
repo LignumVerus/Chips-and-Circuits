@@ -33,8 +33,6 @@ def optimize():
                     else:
                         row.append(main(2, x, w, u, d, draw))
 
-
-
         data.append(row)
 
         print(x)
