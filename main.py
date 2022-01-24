@@ -31,6 +31,8 @@ def find_routes(chips_dict, netlist, board):
     print(len(netlist))
     count = 0
     not_found = 0
+
+    reroute_list = []
     
     # find from which to which coordinate the line has to go
     for line in netlist:
@@ -38,10 +40,19 @@ def find_routes(chips_dict, netlist, board):
         end_coordinate = chips_dict[line.end]
 
         line.route = find_random_route(
-            start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board
-        )
+            start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
 
         board.lines.extend(line.route[1:-1])
+        
+        # add longest routes in comparison to manhattan distance to reroute list
+        multiplier = 1.5
+
+        try:
+            if len(line.route) > multiplier * manhattan_distance(line.route[0], line.route[-1]):
+                # TODO: index opslaan in de 
+                reroute_list.append(netlist.index(line))
+        except IndexError:
+            pass
 
         count += 1
         print(count)
@@ -50,24 +61,86 @@ def find_routes(chips_dict, netlist, board):
 
     print("not found: ", not_found)
 
+    # lijnen (random, langste, grootste afwijking met man_dis) weghalen, kijken of er dan een andere lijn wel kan
 
-    print("START OPTIMIZING")
+    temp_board = copy.deepcopy(board)
     
-    optimized_routes = 0
+    for index in reroute_list:
+        print("reroute list: ", reroute_list)
+        # remove old routes from tempboard you want to reroute 
+        for coordinate in netlist[index].route[1:-1]:
+            temp_board.lines.remove(coordinate)
+    
+    temp_board_new = copy.deepcopy(temp_board)
 
-    for line in netlist: 
+        # # remove old routes in lines
+        # for line in netlist:
+        #     if line.route == netlist[index].route:
+        #         line.route = []
 
-        current_route = line.route
+    # reroute routes in reroute list
+    if reroute_list:
+        # shuffle the list 
+        random.shuffle(reroute_list)
 
-        better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
+        for i, index in enumerate(reroute_list):
+            line = netlist[index]
+            old_route = copy.deepcopy(line.route)
+            
+            if i == 0:
+                new_board = temp_board
+
+            # try to create shorter route or different route of same length
+            start_coordinate = chips_dict[line.start]
+            end_coordinate = chips_dict[line.end]
+            new_route = find_random_route(
+                start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, new_board)
+
+            temp_board.lines.extend(old_route[1:-1])
+            temp_board_new.lines.extend(new_route[1:-1])
+            #board.lines.extend(new_route[1:-1])
+
+            # go back to old board when no improvement
+            if route_costs(temp_board_new, new_route) > route_costs(temp_board, old_route):
+                temp_board_new.lines[:-len(new_route)]
+                temp_board_new.lines.extend(old_route[1:-1])
+                line.route = old_route
+
+                new_board = temp_board_new
+                #board.lines.extend(old_route[1:-1])
+
+            else:
+                temp_board.lines[:-len(old_route)]
+                temp_board.lines.extend(new_route[1:-1])
+                line.route = new_route
+                # gaat fout line.route = new_route
+
+                new_board = temp_board
+
         
-        while len(better) < len(current_route):
-            current_route = better
-            better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
+        # TODO: kijken welk board beter is en die (overschrijven) als nieuwe board
+        #check if total costs of new board are better
+        board = new_board
+            
+
+
+    # print("START OPTIMIZING")
+    
+    # optimized_routes = 0
+
+    # for line in netlist: 
+
+    #     current_route = line.route
+
+    #     better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
         
-        optimized_routes += 1
-        print(optimized_routes)
-        line.route = current_route
+    #     while len(better) < len(current_route):
+    #         current_route = better
+    #         better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
+        
+    #     optimized_routes += 1
+    #     print(optimized_routes)
+    #     line.route = current_route
         
         
 
