@@ -1,48 +1,64 @@
-import csv
 
-from main import main
+from main import *
+from helper import *
 
-def optimize():
+def optimize(netlist, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board):
+ # optimized_routes = 0
+    wind = 0
+    up = 0
+    down = 0
 
-    wind = [0,1,2]
-    up = [0,1,2]
-    down = [0,1,2]
+    for line in netlist: 
 
-    netlist = [1,2,3,4,5,6,7,8,9]
-    draw = False
+        current_route = line.route
 
-    data = []
+        better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
+        
+        while len(better) < len(current_route):
+            current_route = better
+            better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
 
-    for x in netlist:
+        line.route = current_route
+    
+    return netlist
 
-        row = []
-        headers = []
+def optimize_route(route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board):
+    for i, point_one in enumerate(route):
+        # idee: laat punt 2 bij de laatste beginnen
+        for j, point_two in enumerate(route[i:]):
+            distance = manhattan_distance(point_one, point_two)
+            route_distance = j - i
 
-        for w in wind:
-            for u in up:
-                for d in down:
+            if distance > 1 and route_distance > distance:
+                new_route = find_random_route(point_one, point_two, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
 
-                    headers.append(f"{w}, {u}, {d}")
+                if len(new_route) < route_distance and len(new_route) > 0:
 
-                    if x < 4:
-                        row.append(main(0, x, w, u, d, draw))
+                    if len(route[:i]) > 0 and len(route[j:]) > 0: 
+                        temp = route[:i]
+
+                        temp.extend(new_route)
+                        temp.extend(route[j + 1:])
+
+                        route = temp
                     
-                    elif x < 7:
-                        row.append(main(1, x, w, u, d, draw))
+                    elif len(route[:i]) > 0:
+                        temp = route[:i]
+
+                        temp.extend(new_route)
+
+                        route = temp
+                    
+                    elif len(route[j:]) > 0:
+                        temp = route[j + 1:]
+                        
+                        new_route.extend(temp)
+
+                        route = new_route
                     
                     else:
-                        row.append(main(2, x, w, u, d, draw))
-
-        data.append(row)
-
-        print(x)
+                        route = new_route
+                    
+                    return route
     
-    with open(f"gates&netlists/optimize/output.csv", "w", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow(headers)
-
-        for line in data:
-            writer.writerow(line)
-
-
-optimize() 
+    return route

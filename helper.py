@@ -91,3 +91,14 @@ def costs(netlist):
     k = sum(value - 1 for value in counts.values())
 
     return n + 300 * k
+
+
+def not_found(netlist):
+    empty = 0
+
+    for x in netlist:
+        if not x.route:
+            empty += 1
+    
+    print("not found: ",empty)
+    return empty

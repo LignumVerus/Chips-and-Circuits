@@ -16,7 +16,10 @@ from classes import Chip, Line, Board
 from helper import *
 from loader import *
 from output import *
+from algorithm import *
+from optimize import *
 
+recursion_counter = 0
 
 def find_routes(chips_dict, netlist, wind, up, down, board):
     """
@@ -24,386 +27,298 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
     """
     # gets board size
     min_x, max_x, min_y, max_y, min_z, max_z = get_board_size(chips_dict)
-
+    
     netlist = sorted_manhattan_distance(chips_dict, netlist)
 
-    # print(len(netlist))
-    # count = 0
-    not_found = 0
-
-    reroute_list = []
+    # empty routes
+    # reroute_list_0 = queue.Queue()
+    # all other routes
+    # long_routes = []
     
     # find from which to which coordinate the line has to go
     for line in netlist:
         start_coordinate = chips_dict[line.start]
         end_coordinate = chips_dict[line.end]
 
-        line.route = find_random_route(
-            start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board
-        )
+        line.route = recursive(netlist, start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
+    
+    print("START OPTIMIZING")
+    # netlist = optimize(netlist, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
 
+    empty = not_found(netlist)
 
-        board.lines.extend(line.route[1:-1])
+    return netlist, empty
+
+#
+def recursive(netlist, start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board):
+    global recursion_counter
+    recursion_counter += 1 
+
+    print("recursion count: ", recursion_counter)
+    # print(id(netlist))
+
+    route = find_random_route(
+        start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board
+    )
+
+    # add longest routes in comparison to manhattan distance to reroute list
+    # multiplier = 1.5
+
+    #add longest AND empty. First reroute all empty then all longest. shuffle independently?
+    if not route[1]:
+        # reroute_list_0.put(netlist.index(line))
+
+        # find coordinate with shortest manhattan distance to end
+        # shortest_distance = manhattan_distance(start_coordinate, end_coordinate)
+        closest_coordinate_list = []
+        # closest_coordinate = start_coordinate
+        # closest_coordinate_list.append(closest_coordinate)
+
+        for coordinate in route[0]:
+            closest_coordinate_list.append((coordinate, manhattan_distance(coordinate, end_coordinate)))
         
-        # add longest routes in comparison to manhattan distance to reroute list
-        multiplier = 1.5
-
-        #add longest AND empty. First reroute all empty then all longest. shuffle independently?.
+        coordinates = sorted(closest_coordinate_list, key=lambda x: x[1])
+            # print("*", coordinate, end_coordinate)
+            # new_distance = manhattan_distance(coordinate, end_coordinate)
+            # if new_distance < shortest_distance:
+            #     shortest_distance = new_distance
+            #     closest_coordinate = coordinate
         
-        try:
-            #if not line.route:
-                #reroute_list.insert(0, netlist.index(line))
-            if len(line.route) > multiplier * manhattan_distance(line.route[0], line.route[-1]):
-                # TODO: index opslaan in de 
-                reroute_list.append(netlist.index(line))
-        except IndexError:
-            pass
+
+        #     closest_coordinate_list.append(coordinate)
+        # print("*", closest_coordinate)
+                    
+        # find which line blocks the path
+        tem = 0
+
+        for closest_coordinate in coordinates:
+            closest_coordinate = closest_coordinate[0]
+
+            for line in netlist:
+                w = (closest_coordinate[0] - 1, closest_coordinate[1], closest_coordinate[2])
+                e = (closest_coordinate[0] + 1, closest_coordinate[1], closest_coordinate[2])
+                n = (closest_coordinate[0], closest_coordinate[1] - 1, closest_coordinate[2])
+                s = (closest_coordinate[0], closest_coordinate[1] + 1, closest_coordinate[2])
+                d = (closest_coordinate[0], closest_coordinate[1], closest_coordinate[2] - 1)
+                u = (closest_coordinate[0], closest_coordinate[1], closest_coordinate[2] + 1)
+
+                tem += 1
+
+                if line.route and (n in line.route or e in line.route or s in line.route or w in line.route or u in line.route or d in line.route):
+
+                    #print("old route, ", line.route)
+                    # verwijder line
+                    for coordinate in line.route[1:-1]:
+                        board.lines.remove(coordinate)
+                    
+                    line.route = []
+
+                    # print("line removed, try finding new line")
+                    route = recursive(netlist, start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
+
+                    # print("put removed line back on the board")
+                    line.route = recursive(netlist, chips_dict[line.start], chips_dict[line.end], chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)  
+
+
+                    #print("dit gebeurd hier voor, ", route)   
+                    #print("route2:", route)         
+                    board.lines.extend(route[1:-1])
+                    return route
+    else:
+        #print("route 1:",route)
+        board.lines.extend(route[0][1:-1])
+        return route[0]
+
+    # Voor elke coordinaat in de laatste willekeurige child is er niet 1 aangrensende lijn
+    print("GAAT FOUT")
+    return []
+
+
+    # eerste item is het langste in vergelijking met de man_dis
+    # long_routes = sorted(long_routes, key=lambda x: x[1])
+    
+        
+        # elif len(line.route) > multiplier * manhattan_distance(line.route[0], line.route[-1]):
+        #     # TODO: sorted on difference between actual length and manhattan distance
+        #     reroute_list_1.append(netlist.index(line))
 
         # count += 1
         # print(count)
-        if len(line.route) == 0:
-            not_found += 1
-
-    print("not found: ", not_found)
 
     # lijnen (random, langste, grootste afwijking met man_dis) weghalen, kijken of er dan een andere lijn wel kan
 
-    temp_board = copy.deepcopy(board)
+    # keep going until all routes have been made
+    # i = 0
     
-    for index in reroute_list:
-        print("reroute list: ", reroute_list)
-        # remove old routes from tempboard you want to reroute 
-        for coordinate in netlist[index].route[1:-1]:
-            temp_board.lines.remove(coordinate)
+    # while not reroute_list_0.empty() and i < 1000:
+    #     print(i)
+    #     # neem een lege route (verwijder uit reroute_list_0)
+    #     empty_route = reroute_list_0.get()
+    #     line_empty = netlist[empty_route]
+    #     # verwijder 1 lange (langste) route uit board.lines en uit line
+    #     long_route = long_routes.pop(0)
+    #     #           (line, index in netlist)
+    #     line_long = (netlist[long_route[0]], long_route[0])
+        
+    #     # remove the coordinates of the long route from the board
+    #     for coordinate in line_long[0].route[1:-1]:
+    #         board.lines.remove(coordinate)
+        
+    #     # save the long routes
+    #     line_long_list = []
+    #     line_long_list.append(line_long)
+        
+    #     # remove the route
+    #     line_long[0].route = []
     
-    temp_board_new = copy.deepcopy(temp_board)
+    #     # probeer lege route te leggen
+    #     start_coordinate = chips_dict[line_empty.start]
+    #     end_coordinate = chips_dict[line_empty.end]
+    #     new_route = find_random_route(
+    #         start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)[0]
 
-        # # remove old routes in lines
-        # for line in netlist:
-        #     if line.route == netlist[index].route:
-        #         line.route = []
+    #     # keep going until a route has been made for this route
+    #     j = 0
+    #     while not new_route and j < 1000:
+    #         # verwijder nog een lange route tot het wel lukt
+    #         long_route_2 = long_routes.pop(0)
+    #         line_long_2 = (netlist[long_route_2[0]], long_route_2[0])
 
-    # reroute routes in reroute list
-    if reroute_list:
-        # shuffle the list 
-        random.shuffle(reroute_list)
+    #         for coordinate in line_long_2[0].route[1:-1]:
+    #             board.lines.remove(coordinate)
 
-        for i, index in enumerate(reroute_list):
-            line = netlist[index]
-            old_route = copy.deepcopy(line.route)
+    #         # remove a route
+    #         line_long_2[0].route = []
+    #         line_long_list.append(line_long_2)
+    #         # probeer nieuwe route te vinden
+    #         new_route = find_random_route(
+    #             start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)[0]
             
-            if i == 0:
-                new_board = temp_board
+    #         j += 1
 
-            # try to create shorter route or different route of same length
-            start_coordinate = chips_dict[line.start]
-            end_coordinate = chips_dict[line.end]
-            new_route = find_random_route(
-                start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, new_board)
+    #     # add the new route to the board and the line class
+    #     line_empty.route = new_route
+    #     board.lines.extend(new_route[1:-1])
 
-            temp_board.lines.extend(old_route[1:-1])
-            temp_board_new.lines.extend(new_route[1:-1])
-            #board.lines.extend(new_route[1:-1])
-
-            # go back to old board when no improvement
-            if route_costs(temp_board_new, new_route) > route_costs(temp_board, old_route):
-                temp_board_new.lines[:-len(new_route)]
-                temp_board_new.lines.extend(old_route[1:-1])
-                line.route = old_route
-
-                new_board = temp_board_new
-                #board.lines.extend(old_route[1:-1])
-
-            else:
-                temp_board.lines[:-len(old_route)]
-                temp_board.lines.extend(new_route[1:-1])
-                line.route = new_route
-                # gaat fout line.route = new_route
-
-                new_board = temp_board
-
+    #     # leg verwijderde routes opnieuw
+    #     for line in line_long_list:
+    #         # leg route voor verwijderde lange route
+    #         start_long = chips_dict[line[0].start]
+    #         end_long = chips_dict[line[0].end]
+    #         new_route_long = find_random_route(
+    #             start_long, end_long, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)[0]
+    #         if not new_route_long:
+    #             reroute_list_0.put(line[1])
+    #         else:
+    #             line[0].route = new_route_long
+    #             board.lines.extend(new_route_long[1:-1])
         
-        # TODO: kijken welk board beter is en die (overschrijven) als nieuwe board
-        #check if total costs of new board are better
-        board = new_board
+    #     # krijg nieuwe scores van de lines die een route hebben
+    #     long_routes = []
+
+    #     for line in netlist:
+    #         if line.route:
+    #             score = manhattan_distance(line.route[0], line.route[-1])/len(line.route)
+    #             long_routes.append((netlist.index(line), score))
+    
+    #     long_routes = sorted(long_routes, key=lambda x: x[1])
+        
+    #     i += 1
+
+    # # #--------------------------
+    # # temp_board = copy.deepcopy(board)
+    
+    # # for index in reroute_list_1:
+    # #     print("reroute list: ", reroute_list_1)
+    # #     # remove old routes from tempboard you want to reroute 
+    # #     for coordinate in netlist[index].route[1:-1]:
+    # #         temp_board.lines.remove(coordinate)
+    
+    # temp_board_new = copy.deepcopy(temp_board)
+
+    #     # # remove old routes in lines
+    #     # for line in netlist:
+    #     #     if line.route == netlist[index].route:
+    #     #         line.route = []
+
+    # # reroute routes in reroute list
+    # if reroute_list_1 or reroute_list_0:
+    #     # shuffle the list 
+    #     random.shuffle(reroute_list_1)
+    #     # add lists together
+    #     reroute_list_0.extend(reroute_list_1)
+
+    #     for i, index in enumerate(reroute_list_0):
+    #         line = netlist[index]
             
-
-
-    print("START OPTIMIZING")
-    
-    # optimized_routes = 0
-    wind = 0
-    up = 0
-    down = 0
-
-    for line in netlist: 
-
-        current_route = line.route
-
-        better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
-        
-        while len(better) < len(current_route):
-            current_route = better
-            better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
-
-        
-    #     optimized_routes += 1
-    #     print(optimized_routes)
-        line.route = current_route
-        
-        
-
-    # board.add_lines(route1, route2)
-    return netlist, not_found
-
-    
-    # find_route(x_start, y_start x_end, y_end)
-    # pass
-
-# algorithm route
-# *prevent self collisions
-# *prevent collisions with other routes
-# give crossing last priority (except when it would be longer than 300 steps?) (currently forbidden)
-# prioritize x and y directions over z directions
-# *sort netlist on manhattan distance
-# *place shortest manhattan distance routes first, then increasingly longer?
-# *xmax-xmin + ymax-ymin + zmax-zmin
-# 
-
-def optimize_route(route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board):
-    for i, point_one in enumerate(route):
-        # idee: laat punt 2 bij de laatste beginnen
-        for j, point_two in enumerate(route[i:]):
-            distance = manhattan_distance(point_one, point_two)
-            route_distance = j - i
-
-            if distance > 1 and route_distance > distance:
-                new_route = find_random_route(point_one, point_two, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
-
-                if len(new_route) < route_distance and len(new_route) > 0:
-
-                    if len(route[:i]) > 0 and len(route[j:]) > 0: 
-                        temp = route[:i]
-
-                        temp.extend(new_route)
-                        temp.extend(route[j + 1:])
-
-                        route = temp
-                    
-                    elif len(route[:i]) > 0:
-                        temp = route[:i]
-
-                        temp.extend(new_route)
-
-                        route = temp
-                    
-                    elif len(route[j:]) > 0:
-                        temp = route[j + 1:]
-                        
-                        new_route.extend(temp)
-
-                        route = new_route
-                    
-                    else:
-                        route = new_route
-                    
-                    return route
-    
-    return route
+    #         if line.route:
+    #             old_route = copy.deepcopy(line.route)
             
+    #         if i == 0:
+    #             new_board = temp_board
 
+    #         # try to create shorter route or different route of same length
+    #         start_coordinate = chips_dict[line.start]
+    #         end_coordinate = chips_dict[line.end]
+    #         new_route = find_random_route(
+    #             start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, new_board)
 
+    #         temp_board.lines.extend(old_route[1:-1])
+    #         temp_board_new.lines.extend(new_route[1:-1])
+    #         #board.lines.extend(new_route[1:-1])
 
+    #         # go back to old board when no improvement
+    #         if route_costs(temp_board_new, new_route) > route_costs(temp_board, old_route):
+    #             temp_board_new.lines[:-len(new_route)]
+    #             temp_board_new.lines.extend(old_route[1:-1])
+    #             line.route = old_route
 
-def find_route(start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z):
+    #             new_board = temp_board_new
+    #             #board.lines.extend(old_route[1:-1])
 
-    pass
+    #         else:
+    #             temp_board.lines[:-len(old_route)]
+    #             temp_board.lines.extend(new_route[1:-1])
+    #             line.route = new_route
+    #             # gaat fout line.route = new_route
+
+    #             new_board = temp_board
+
+        
+    #     # TODO: kijken welk board beter is en die (overschrijven) als nieuwe board
+    #     #check if total costs of new board are better
+    #     board = new_board
 
 
 def find_random_route(
     start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board
 ):
     """
-    creates random route
+    creates route 
     """
-    # route = []
-    # route.append(start_coordinate)
-
-    # gets list of chips not on start and end coordinate
+    # route can not cross another chip
     invalid_chip_coords = list(chips_dict.values())
 
     if end_coordinate in invalid_chip_coords:
         invalid_chip_coords.remove(end_coordinate)
-
-    q = queue.Queue()
-    q.put([start_coordinate])
-
-    # g = cost? of the route travelled
-    # h = manhattan distance between current coord and end coord
-    # f = g + h (total cost)
-
-    while not q.empty():
-        route = q.get()
-
-        costs = []
-
-        for i in valid_directions(
-            route[-1], invalid_chip_coords, route, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board
-        ):
-            child = copy.deepcopy(route)
-            child.append(i[0])
-
-            if i[0] == end_coordinate:
-                # print(len(board.lines))
-                return child
-
-            g = route_costs(board, child)
-            # meer kosten als het op dezelfde laag blijft voor meer ruimte onderin
-            # meer kosten als de route dicht bij een andere lijn komt
-            # lijnen (random, langste, grootste afwijking met man_dis) weghalen, kijken of er dan een andere lijn wel kan
-            h = manhattan_distance(i[0], end_coordinate) + i[1]
-            f = g + h
-
-            costs.append((child, f))
-
-        # put child with lowest cost
-        if len(costs) > 0:
-            best_child = sorted(costs, key=lambda x: x[1])[0]
-            best_child_path = best_child[0]
-            q.put(best_child_path)
-
-    # TO DO: error melding! 
-    return []
-
-    # while current_coordinate != end_coordinate:
+    
+    return astar_algorithm(start_coordinate, end_coordinate, invalid_chip_coords, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
 
 
-    #     # get all valid directions
-    #     choices = 
-
-    #     # update current coord with random choice
-    #     if choices:
-    #         print("full", choices)
-    #         current_coordinate = random.choice(choices)
-    #     # if there are no choices left, get directions for the previous coord, remove the bad coord and remove it from the route
-    #     else:
-    #         while not choices:
-    #             choices = valid_directions(route[-2], invalid_chip_coords, route, min_x, max_x, min_y, max_y, min_z, max_z, board)
-    #             print("empty", choices)
-    #             route.remove(current_coordinate)
-    #             choices.remove(current_coordinate)
-
-    #         current_coordinate = random.choice(choices)
-
-    #     # add coord to route
-    #     route.append(current_coordinate)
-
-    # return route
-
-def valid_directions(
-    current_coordinate, invalid_chip_coords, route, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board
-):
-    """
-    finds all possible directions from point in grid
-    """
-    choices = []
-
-    cost_west = wind
-    cost_east = wind
-    cost_north = wind
-    cost_south = wind
-    cost_up = up
-    cost_down = down
-
-    # west
-    if (
-        # can't go out of board
-        current_coordinate[0] - 1 >= min_x
-        # can't go over another chip
-        and (current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2])
-        not in invalid_chip_coords
-        # can't collide with another line
-        and is_not_collision((current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2]), board)
-        # can't collide with own route
-        and (current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2]) not in route
-    ):
-        choices.append(((current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2]), cost_west))
-
-    # east
-    if (
-        current_coordinate[0] + 1 <= max_x
-        and (current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2])
-        not in invalid_chip_coords
-        and is_not_collision((current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2]), board)
-        and (current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2]) not in route
-    ):
-        choices.append(((current_coordinate[0] + 1, current_coordinate[1], current_coordinate[2]), cost_east))
-
-    # north
-    if (
-        current_coordinate[1] - 1 >= min_y
-        and (current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2])
-        not in invalid_chip_coords
-        and is_not_collision((current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2]), board)
-        and (current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2]) not in route
-    ):
-        choices.append(((current_coordinate[0], current_coordinate[1] - 1, current_coordinate[2]), cost_north))
-
-    # south
-    if (
-        current_coordinate[1] + 1 <= max_y
-        and (current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2])
-        not in invalid_chip_coords
-        and is_not_collision((current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2]), board)
-        and (current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2]) not in route
-    ):
-        choices.append(((current_coordinate[0], current_coordinate[1] + 1, current_coordinate[2]), cost_south))
-
-    # down
-    if (
-        current_coordinate[2] - 1 >= min_z
-        and (current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1)
-        not in invalid_chip_coords
-        and is_not_collision((current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1), board)
-        and (current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1) not in route
-    ):
-        choices.append(((current_coordinate[0], current_coordinate[1], current_coordinate[2] - 1), cost_down))
-
-    # up
-    if (
-        current_coordinate[2] + 1 <= max_z
-        and (current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1)
-        not in invalid_chip_coords
-        and is_not_collision((current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1), board)
-        and (current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1) not in route
-    ):
-        choices.append(((current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1), cost_up))
-
-    # check if coord is backtracking
-    if len(route) > 2:
-        # cannot go back to previous coordinate
-        for choice in choices:
-            if choice[0] == route[-2]:
-                # delete invalid choice from choices
-                choices.remove(choice)
-
-    return choices
 
 
 def main(chip, net, wind = 0, up = 0, down = 0, draw = True):
+    
     # create a board
     board = Board([])
     chips_dict = read_csv_chips(f"gates&netlists/chip_{chip}/print_{chip}.csv", board)
     netlist = read_csv_netlist(f"gates&netlists/chip_{chip}/netlist_{net}.csv")
+    
     netlist_routes = find_routes(chips_dict, netlist, wind, up, down, board)
 
     if draw:
         create_grid(chips_dict, netlist_routes[0])
         create_output(netlist_routes[0], chip, net)
 
-    # output how many found
+    # output how many not found
     return netlist_routes[1]
-
-
-# # arg1 = chip , arg2 = net
-# main(sys.argv[1], sys.argv[2])
