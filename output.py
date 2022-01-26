@@ -68,3 +68,6 @@ def create_output(netlist_routes, chip, net):
 
         cost = costs(netlist_routes)
         writer.writerow([f"chip_{chip}_net_{net}", int(cost)])
+
+    return cost
+    

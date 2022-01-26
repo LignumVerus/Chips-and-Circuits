@@ -43,7 +43,7 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
         line.route = recursive(netlist, start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
     
     print("START OPTIMIZING")
-    # netlist = optimize(netlist, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
+    netlist = optimize(netlist, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
 
     empty = not_found(netlist)
 
@@ -54,7 +54,7 @@ def recursive(netlist, start_coordinate, end_coordinate, chips_dict, min_x, max_
     global recursion_counter
     recursion_counter += 1 
 
-    print("recursion count: ", recursion_counter)
+    # print("recursion count: ", recursion_counter)
     # print(id(netlist))
 
     route = find_random_route(
@@ -290,22 +290,6 @@ def recursive(netlist, start_coordinate, end_coordinate, chips_dict, min_x, max_
     #     board = new_board
 
 
-def find_random_route(
-    start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board
-):
-    """
-    creates route 
-    """
-    # route can not cross another chip
-    invalid_chip_coords = list(chips_dict.values())
-
-    if end_coordinate in invalid_chip_coords:
-        invalid_chip_coords.remove(end_coordinate)
-    
-    return astar_algorithm(start_coordinate, end_coordinate, invalid_chip_coords, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
-
-
-
 
 def main(chip, net, wind = 0, up = 0, down = 0, draw = True):
     
@@ -318,7 +302,8 @@ def main(chip, net, wind = 0, up = 0, down = 0, draw = True):
 
     if draw:
         create_grid(chips_dict, netlist_routes[0])
-        create_output(netlist_routes[0], chip, net)
+    
+    cost = create_output(netlist_routes[0], chip, net)
 
-    # output how many not found
-    return netlist_routes[1]
+    # output how many not found and cost
+    return netlist_routes[1], cost

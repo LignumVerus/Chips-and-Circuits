@@ -2,7 +2,7 @@ import csv
 
 from main import main
 
-def optimize():
+def try_all():
 
     wind = [2]
     up = [0]
@@ -44,5 +44,4 @@ def optimize():
         for line in data:
             writer.writerow(line)
 
-
-optimize() 
+try_all() 

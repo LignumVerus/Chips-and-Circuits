@@ -4,6 +4,20 @@ import copy
 from helper import *
 from options import *
 
+def find_random_route(
+    start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board
+):
+    """
+    creates route 
+    """
+    # route can not cross another chip
+    invalid_chip_coords = list(chips_dict.values())
+
+    if end_coordinate in invalid_chip_coords:
+        invalid_chip_coords.remove(end_coordinate)
+    
+    return astar_algorithm(start_coordinate, end_coordinate, invalid_chip_coords, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
+
 def astar_algorithm(start_coordinate, end_coordinate, invalid_chip_coords, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board):
     q = queue.Queue()
     q.put([start_coordinate])

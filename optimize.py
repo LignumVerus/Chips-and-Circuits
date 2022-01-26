@@ -1,5 +1,5 @@
 
-from main import *
+from algorithm import *
 from helper import *
 
 def optimize(netlist, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board):
@@ -8,6 +8,7 @@ def optimize(netlist, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, boar
     up = 0
     down = 0
 
+    # idee: doe dit while er nog een netlist verbeterd is 
     for line in netlist: 
 
         current_route = line.route
@@ -30,9 +31,11 @@ def optimize_route(route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, 
             route_distance = j - i
 
             if distance > 1 and route_distance > distance:
-                new_route = find_random_route(point_one, point_two, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
+                pos_new_route = find_random_route(point_one, point_two, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
 
-                if len(new_route) < route_distance and len(new_route) > 0:
+                new_route = pos_new_route[0]
+
+                if len(new_route) < route_distance and len(new_route) > 0 and pos_new_route[1]:
 
                     if len(route[:i]) > 0 and len(route[j:]) > 0: 
                         temp = route[:i]
