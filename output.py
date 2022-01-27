@@ -38,7 +38,7 @@ def create_grid(chips_dict, netlist_routes):
             y_lines.append(line[1])
             z_lines.append(line[2])
 
-        ax.step(x_lines, y_lines, z_lines, linewidth=2.5)
+        ax.plot(x_lines, y_lines, z_lines, linewidth=2.5)
 
     # plot
     ax.scatter(x_list, y_list, z_list, zorder=2, s=300)

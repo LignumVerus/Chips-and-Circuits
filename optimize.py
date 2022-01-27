@@ -2,36 +2,41 @@
 from algorithm import *
 from helper import *
 
-def optimize(netlist, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board):
+# board wordt niet geupdate dus probeerd ook omzichzelf heen te leggen
+
+def optimize(line, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board, overlap):
  # optimized_routes = 0
     wind = 0
     up = 0
     down = 0
 
-    # idee: doe dit while er nog een netlist verbeterd is 
-    for line in netlist: 
+    current_route = line.route
 
-        current_route = line.route
+    # # maak bord leger
+    for coordinate in line.route[1:-1]:
+        board.lines.remove(coordinate)    
 
-        better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
-        
-        while len(better) < len(current_route):
-            current_route = better
-            better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
-
-        line.route = current_route
+    better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board, overlap)
     
-    return netlist
+    while len(better) < len(current_route):
+        current_route = better
+        better = optimize_route(current_route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board, overlap)
 
-def optimize_route(route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board):
+    # voeg weer toe aan bord
+    board.lines.extend(current_route[1:-1])
+    line.route = current_route
+
+    # return line.route
+
+def optimize_route(route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board, overlap):
+    
     for i, point_one in enumerate(route):
-        # idee: laat punt 2 bij de laatste beginnen
-        for j, point_two in enumerate(route[i:]):
+        for j, point_two in reversed(list(enumerate(route[i:]))):
             distance = manhattan_distance(point_one, point_two)
             route_distance = j - i
 
             if distance > 1 and route_distance > distance:
-                pos_new_route = find_random_route(point_one, point_two, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
+                pos_new_route = find_random_route(point_one, point_two, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board, overlap)
 
                 new_route = pos_new_route[0]
 

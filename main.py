@@ -6,6 +6,7 @@
 * Finn Peranovic 12740454
 * Rachel de Haan 12423254
 """
+from tracemalloc import start
 import numpy as np
 import random
 import queue
@@ -29,78 +30,87 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
     
     netlist = sorted_manhattan_distance(chips_dict, netlist)
 
+    # overlap is not allowed
+    overlap = False
    
     # find from which to which coordinate the line has to go
     for line in netlist:
         start_coordinate = chips_dict[line.start]
         end_coordinate = chips_dict[line.end]
 
-        line.route = recursive(netlist, start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
+        line.route = recursive(netlist, start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board, overlap)
+        optimize(line, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board, overlap)
     
+    # Prepare for hillclimber
+    # routes die niet gevonden zijn leggen met kruisen
+    overlap = True
+
+    for line in netlist:
+        if not line.route:
+            start_coordinate = chips_dict[line.start]
+            end_coordinate = chips_dict[line.end]
+            
+            line.route = find_random_route(start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board, overlap)[0]
+            board.lines.extend(line.route[0][1:-1])
+
+    # regels voor kruisen (kunnen ook gewoon de kortste route leggen)
+
+    # optie: lijnstuk weghalen en daartussen nieuwe route leggen met semirandomheid
+    # optie: op recht stuk 2 aangrenzende coordinaten samen 1 stap een loodrechte richting op laten maken (dit voor verschillende situaties hardcoden) (poep)
+    # optie: heuristiek kosten aanpassen en dan de lijn nemen met de beste heuristiek in die situatie!
+
+    # probeer x aantal keer te verbeteren (muteren)
+
+
     print("START OPTIMIZING")
-    netlist = optimize(netlist, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board)
 
     empty = not_found(netlist)
 
     return netlist, empty
 
 #
-def recursive(netlist, start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board):
+def recursive(netlist, start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board, overlap):
     global recursion_counter
-    recursion_counter += 1 
+    recursion_counter += 1
 
     # print("recursion count: ", recursion_counter)
     # print(id(netlist))
 
     route = find_random_route(
-        start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board
+        start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board, overlap
     )
 
     # if not found
     if not route[1]:
-        closest_coordinate_list = []
+        i = 0
+        index_line = closest_line_index(route[0][i][0], netlist, end_coordinate, chips_dict, min_x, max_x,  min_y, max_y, min_z, max_z, board, overlap)
 
-        for coordinate in route[0]:
-            closest_coordinate_list.append((coordinate, manhattan_distance(coordinate, end_coordinate)))
-        
-        coordinates = sorted(closest_coordinate_list, key=lambda x: x[1])
+        if index_line is False:
+            print("geen lijn gevonden")
+            return []
 
-        for coordinate in coordinates:
-            closest_coordinate = coordinate[0]
+        line = netlist[index_line]
 
-            for line in netlist:
-                w = (closest_coordinate[0] - 1, closest_coordinate[1], closest_coordinate[2])
-                e = (closest_coordinate[0] + 1, closest_coordinate[1], closest_coordinate[2])
-                n = (closest_coordinate[0], closest_coordinate[1] - 1, closest_coordinate[2])
-                s = (closest_coordinate[0], closest_coordinate[1] + 1, closest_coordinate[2])
-                d = (closest_coordinate[0], closest_coordinate[1], closest_coordinate[2] - 1)
-                u = (closest_coordinate[0], closest_coordinate[1], closest_coordinate[2] + 1)
+        # remove board lines
+        for coordinate in line.route[1:-1]:
+            board.lines.remove(coordinate)
+      
+        line.route = []
 
-                if line.route and (n in line.route or e in line.route or s in line.route or w in line.route or u in line.route or d in line.route):
+        # print("line removed, try finding new line")
+        route = recursive(netlist, start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board, overlap)
 
-                    for coordinate in line.route[1:-1]:
-                        board.lines.remove(coordinate)
-                    
-                    line.route = []
+        # print("put removed line back on the board")
+        line.route = recursive(netlist, chips_dict[line.start], chips_dict[line.end], chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board, overlap)  
+        optimize(line, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board, overlap)
+        #print("route2:", route)
+        return route
 
-                    # print("line removed, try finding new line")
-                    route = recursive(netlist, start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)
-
-                    # print("put removed line back on the board")
-                    line.route = recursive(netlist, chips_dict[line.start], chips_dict[line.end], chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board)  
-
-                    #print("dit gebeurd hier voor, ", route)   
-                    #print("route2:", route)         
-                    board.lines.extend(route[1:-1])
-                    return route
     else:
         #print("route 1:",route)
+        # add board lines
         board.lines.extend(route[0][1:-1])
         return route[0]
-
-    # Voor elke coordinaat in de laatste willekeurige child is er niet 1 aangrensende lijn
-    print("GAAT FOUT")
-    return []
 
 
 def main(chip, net, wind = 0, up = 0, down = 0, draw = True):
