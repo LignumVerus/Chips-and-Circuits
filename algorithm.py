@@ -22,6 +22,8 @@ def astar_algorithm(start_coordinate, end_coordinate, invalid_chip_coords, min_x
     q = queue.Queue()
     q.put([start_coordinate])
 
+    best_unfinished_child = [start_coordinate]
+
     while not q.empty():
         route = q.get()
 
@@ -47,13 +49,20 @@ def astar_algorithm(start_coordinate, end_coordinate, invalid_chip_coords, min_x
         if len(costs) > 0:
             best_child = sorted(costs, key=lambda x: x[1])[0]
             best_child_path = best_child[0]
+
+            old_distance = manhattan_distance(best_unfinished_child[-1], end_coordinate)
+            new_distance = manhattan_distance(best_child_path[-1], end_coordinate)
+            if new_distance < old_distance:
+
+                best_unfinished_child = copy.deepcopy(best_child_path)
+
             q.put(best_child_path)
 
     # no route found, return unfinished route (last child)
     # try with other children closest to end coordinate?
     try:
-        return child, False
+        return best_unfinished_child, False
     except UnboundLocalError:
-        # print("HOI")
-        return [start_coordinate], False
+        print("HOI")
+        return [], False
 
