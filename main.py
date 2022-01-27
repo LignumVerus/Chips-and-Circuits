@@ -6,7 +6,6 @@
 * Finn Peranovic 12740454
 * Rachel de Haan 12423254
 """
-from bcrypt import re
 import numpy as np
 import random
 import queue
