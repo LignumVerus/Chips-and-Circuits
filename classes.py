@@ -27,17 +27,11 @@ class Line:
         pass
         # eerst lijst van alle tuples als string, loopen over route en toevoegen aan lijst met str ervoor
         list_tuples = []
-        for tuple in self.route:
-            list_tuples.append(str(tuple))
-        # lijst returnen als string
-        list_tuples = str(list_tuples)
-        # list_tuples = [x.strip("") for x in list_tuples]
-        # strippen van spaties
-        print(list_tuples.strip(""))
-        return list_tuples.strip("")
-        # return list.strip , zodat die alle spaties eruit haalt
-        
+        for item in self.route:
+            list_tuples.append(item)
 
+        return str(list_tuples).replace(" ","")
+        
 
 class Board:
     def __init__(self, lines):
