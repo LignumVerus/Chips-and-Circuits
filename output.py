@@ -65,7 +65,7 @@ def create_output(netlist_routes, chip, net):
         
         for line in netlist_routes:
             newrow = (int(line.start), int(line.end))
-            writer.writerow([tuple(newrow), line.route])
+            writer.writerow([str(newrow).replace(" ",""), line])
 
         cost = costs(netlist_routes)
         writer.writerow([f"chip_{chip}_net_{net}", int(cost)])
