@@ -43,17 +43,62 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
     
     # Prepare for hillclimber
     # routes die niet gevonden zijn leggen met kruisen
+    print("Hill climber")
     overlap = True
 
-    for line in netlist:
+    manhattan_routes = []
+
+    wind = 0
+    up = 0
+    down = 0
+
+    for index, line in enumerate(netlist):
         if not line.route:
             start_coordinate = chips_dict[line.start]
             end_coordinate = chips_dict[line.end]
             
             line.route = find_random_route(start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board, overlap)[0]
-            board.lines.extend(line.route[0][1:-1])
+            board.lines.extend(line.route[1:-1])
 
-    # regels voor kruisen (kunnen ook gewoon de kortste route leggen)
+            manhattan_routes.append(index)
+
+    
+    # shuffle manhattan routes
+    #(wind, up, down)
+    all_routes = [x for x in range(len(netlist))]
+    if manhattan_routes:
+        combis = [(0,0,0), (1,0,0), (2,0,0), (2,0,1), (3,0,0), (3,0,1), (3,0,2), (4,0,0), (4,0,2)]
+        for _ in range(10):
+            random.shuffle(all_routes)
+            for index in all_routes:
+                for cost in combis:
+                    wind = cost[0]
+                    up = cost[1]
+                    down = cost[2]
+                    line = netlist[index]
+
+                    old_cost = route_costs(board, line.route)
+
+                    temp_board = copy.deepcopy(board)
+
+                    for coordinate in line.route[1:-1]:
+                        temp_board.lines.remove(coordinate)
+                    
+                    new_route = find_random_route(line.route[0], line.route[-1], chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, temp_board, overlap)[0]
+                    temp_board.lines.extend(new_route[1:-1])
+
+                    new_cost = route_costs(temp_board, new_route)
+
+                    if new_cost < old_cost:
+                        print("old:", old_cost)
+                        print("new:", new_cost)
+                        print("found better route")
+                        line.route = new_route
+                        board = copy.deepcopy(temp_board)
+
+
+    # for every manhattan route, remove it, use x different heuristic methods and save the best route.
+
 
     # optie: lijnstuk weghalen en daartussen nieuwe route leggen met semirandomheid
     # optie: op recht stuk 2 aangrenzende coordinaten samen 1 stap een loodrechte richting op laten maken (dit voor verschillende situaties hardcoden) (poep)
@@ -61,8 +106,7 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
 
     # probeer x aantal keer te verbeteren (muteren)
 
-
-    print("START OPTIMIZING")
+    # print("START OPTIMIZING")
 
     empty = not_found(netlist)
 

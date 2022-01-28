@@ -62,12 +62,14 @@ def create_output(netlist_routes, chip, net):
         writer = csv.writer(f)
         writer.writerow(["net", "wires"])
 
+        
         for line in netlist_routes:
             newrow = (int(line.start), int(line.end))
             writer.writerow([tuple(newrow), line.route])
 
         cost = costs(netlist_routes)
         writer.writerow([f"chip_{chip}_net_{net}", int(cost)])
+
 
     return cost
     

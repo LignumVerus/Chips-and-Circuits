@@ -61,6 +61,8 @@ def astar_algorithm(start_coordinate, end_coordinate, invalid_chip_coords, min_x
                 
                 best_unfinished_children[-1] = (best_child_path, manhattan_distance(best_child_path[-1], end_coordinate))
 
+            #TODO: idee: in begin wind en down kosten 1 en zodra niveau 7 is bereikt alles 0?
+
             q.put(best_child_path)
 
     # no route found, return unfinished route (last child)
