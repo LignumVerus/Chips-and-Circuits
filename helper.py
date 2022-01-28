@@ -7,16 +7,24 @@
 * Rachel de Haan 12423254
 """
 from scipy.spatial.distance import cityblock
+import sys
 
 def route_costs(board, route):
     n = len(route) - 1
 
     counts = dict()
     for coordinate in board.lines:
-        if coordinate in counts:
-            counts[coordinate] += 1
-        else:
-            counts[coordinate] = 1
+        
+        try:
+            if coordinate in counts:
+                counts[coordinate] += 1
+            else:
+                counts[coordinate] = 1
+        except TypeError:
+            print("coordinate", coordinate)
+
+            sys.exit()
+
 
     k = sum(value - 1 for value in counts.values())
 

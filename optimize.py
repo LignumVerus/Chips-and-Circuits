@@ -4,6 +4,7 @@ from helper import *
 
 # board wordt niet geupdate dus probeerd ook omzichzelf heen te leggen
 
+# note: in-place function
 def optimize(line, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board, overlap):
  # optimized_routes = 0
     wind = 0
@@ -12,7 +13,7 @@ def optimize(line, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board, 
 
     current_route = line.route
 
-    # # maak bord leger
+    #  maak bord leger
     for coordinate in line.route[1:-1]:
         board.lines.remove(coordinate)    
 
@@ -26,7 +27,6 @@ def optimize(line, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board, 
     board.lines.extend(current_route[1:-1])
     line.route = current_route
 
-    # return line.route
 
 def optimize_route(route, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board, overlap):
     

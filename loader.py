@@ -26,10 +26,7 @@ def read_csv_chips(filename, board):
             # Chip(id, x, y), DOET NU NIKS!!
             chip = Chip(row[0], row[1], row[2], 0)
             # chip_list.append(chip)
-
-            # add x and y coordinate to board
-            board.add_chip(chip.x, chip.y, 0)
-
+            
             # Make a dictionary of all the chips, with the id as the key and tuple of coordinates as value
             chips_dict[row[0]] = (chip.x, chip.y, 0)
 

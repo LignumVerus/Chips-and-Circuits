@@ -42,8 +42,10 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
         optimize(line, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board, overlap)
     
     # Prepare for hillclimber
-    # routes die niet gevonden zijn leggen met kruisen
+   
     print("Hill climber")
+
+    # allow intersections for routes that couldn't initially be found
     overlap = True
 
     manhattan_routes = []
@@ -58,19 +60,43 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
             end_coordinate = chips_dict[line.end]
             
             line.route = find_random_route(start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board, overlap)[0]
+
             board.lines.extend(line.route[1:-1])
 
             manhattan_routes.append(index)
 
-    
-    # shuffle manhattan routes
+
     #(wind, up, down)
+    print("start value cost: ", costs(netlist))
+
     all_routes = [x for x in range(len(netlist))]
     if manhattan_routes:
-        combis = [(0,0,0), (1,0,0), (2,0,0), (2,0,1), (3,0,0), (3,0,1), (3,0,2), (4,0,0), (4,0,2)]
-        for _ in range(10):
+
+        for i in range(5):
+            print(i)
+            combis = []
+
+            #TODO: try range 10, bigger RNG?
+            choices = [x for x in range(5)]
+            # and also try range 100, more options to try
+            for _ in range(50):
+                #TODO: find which combis provide improvement
+                wind_option = random.choice(choices)
+                up_option = random.choice(choices)
+                down_option = random.choice(choices)
+                
+                # in virtually all cases, relatively high up-values don't result in improvement
+                while wind_option < up_option and down_option < up_option:
+                    wind_option = random.choice(choices)
+                    up_option = random.choice(choices)
+                    down_option = random.choice(choices)
+
+                combis.append( (random.choice(choices), random.choice(choices), random.choice(choices)) )
+
+            combis = set(combis)
             random.shuffle(all_routes)
             for index in all_routes:
+                
                 for cost in combis:
                     wind = cost[0]
                     up = cost[1]
@@ -84,17 +110,18 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
                     for coordinate in line.route[1:-1]:
                         temp_board.lines.remove(coordinate)
                     
-                    new_route = find_random_route(line.route[0], line.route[-1], chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, temp_board, overlap)[0]
-                    temp_board.lines.extend(new_route[1:-1])
+                    new_route = find_random_route(line.route[0], line.route[-1], chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, temp_board, overlap)
 
-                    new_cost = route_costs(temp_board, new_route)
+                    if new_route[1]:
+                        temp_board.lines.extend(new_route[0][1:-1])
+                        
+                        new_cost = route_costs(temp_board, new_route[0])
 
-                    if new_cost < old_cost:
-                        print("old:", old_cost)
-                        print("new:", new_cost)
-                        print("found better route")
-                        line.route = new_route
-                        board = copy.deepcopy(temp_board)
+                        if new_cost < old_cost:
+                            print("Good wind, up, down: ", wind, up, down)
+                            line.route = new_route[0]
+                            board = temp_board
+                            print("new netlist cost:", costs(netlist))
 
 
     # for every manhattan route, remove it, use x different heuristic methods and save the best route.
@@ -106,8 +133,6 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
 
     # probeer x aantal keer te verbeteren (muteren)
 
-    # print("START OPTIMIZING")
-
     empty = not_found(netlist)
 
     return netlist, empty
@@ -116,9 +141,6 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
 def recursive(netlist, start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board, overlap):
     global recursion_counter
     recursion_counter += 1
-
-    # print("recursion count: ", recursion_counter)
-    # print(id(netlist))
 
     route = find_random_route(
         start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board, overlap
@@ -147,18 +169,16 @@ def recursive(netlist, start_coordinate, end_coordinate, chips_dict, min_x, max_
         # print("put removed line back on the board")
         line.route = recursive(netlist, chips_dict[line.start], chips_dict[line.end], chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board, overlap)  
         optimize(line, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board, overlap)
-        #print("route2:", route)
+
         return route
 
     else:
-        #print("route 1:",route)
-        # add board lines
+        # add board lines     
         board.lines.extend(route[0][1:-1])
         return route[0]
 
 
 def main(chip, net, wind = 0, up = 0, down = 0, draw = True):
-    
     # create a board
     board = Board([])
     chips_dict = read_csv_chips(f"gates&netlists/chip_{chip}/print_{chip}.csv", board)

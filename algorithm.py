@@ -70,7 +70,6 @@ def astar_algorithm(start_coordinate, end_coordinate, invalid_chip_coords, min_x
     try:
         return sorted(best_unfinished_children, key=lambda x:x[1]), False
     except UnboundLocalError:
-        print("HOI")
         return [], False
 
 
@@ -117,5 +116,4 @@ def closest_line_index(route, netlist, end_coordinate, chips_dict, min_x, max_x,
         routes_found = sorted(routes_found, key=lambda x: x[1])
         return routes_found[0][0]
 
-    # print("geen route gevonden :(")
     return False
