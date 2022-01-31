@@ -1,26 +1,40 @@
 
+"""
+* options.py
+* Returns the valid directions (choices) from a current point 
+* 
+* Viola Koers 12213101
+* Finn Peranovic 12740454
+* Rachel de Haan 12423254
+"""
 from helper import *
 
 def valid_directions(
-    current_coordinate, invalid_chip_coords, route, min_x, max_x, min_y, max_y, min_z, max_z, wind, up, down, board, overlap
+    current_coordinate, invalid_chip_coords, route, board_size, wind, up, down, board, overlap
 ):
     """
-    finds all possible directions from point in grid
-
-    returns list with tuples. first item is possible next coordinate, second is extra cost for that direction
+    Finds all possible directions from point in grid.
+    Returns list with tuples. First item is possible next coordinate, second is extra cost for that direction.
     """
     choices = []
 
+    min_x = board_size[0]
+    max_x = board_size[1]
+    min_y = board_size[2]
+    max_y = board_size[3]
+    min_z = board_size[4]
+    max_z = board_size[5]
+
     # west
     if (
-        # can't go out of board
+        # cannot go out of board
         current_coordinate[0] - 1 >= min_x
-        # can't go over another chip
+        # cannot go over another chip
         and (current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2])
         not in invalid_chip_coords
-        # can't collide with another line
+        # cannot collide with another line
         and (is_not_collision((current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2]), board) or overlap)
-        # can't collide with own route
+        # cannot collide with own route
         and (current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2]) not in route
     ):
         choices.append(((current_coordinate[0] - 1, current_coordinate[1], current_coordinate[2]), wind))
@@ -74,5 +88,5 @@ def valid_directions(
         and (current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1) not in route
     ):
         choices.append(((current_coordinate[0], current_coordinate[1], current_coordinate[2] + 1), up))
-        
+
     return choices

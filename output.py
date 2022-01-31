@@ -13,21 +13,23 @@ import csv
 
 def create_grid(chips_dict, netlist_routes):
     """
-    visualizes grid
+    Visualizes a 3D grid with the chips and the netlist routes.
     """
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
     
+    # Prepare chips for drawing
     id_list = chips_dict.keys()
     x_list = []
     y_list = []
     z_list = []
+
     for coordinate in chips_dict.values():
         x_list.append(coordinate[0])
         y_list.append(coordinate[1])
         z_list.append(coordinate[2])
-
     
+    # Prepare routes for drawing
     for lines in netlist_routes:
         x_lines = []
         y_lines = []
@@ -38,9 +40,10 @@ def create_grid(chips_dict, netlist_routes):
             y_lines.append(line[1])
             z_lines.append(line[2])
 
+        # Draw the routes
         ax.plot(x_lines, y_lines, z_lines, linewidth=2.5)
 
-    # plot
+    # Draw the chips
     ax.scatter(x_list, y_list, z_list, zorder=2, s=300)
 
     for i, txt in enumerate(id_list):
@@ -54,22 +57,21 @@ def create_grid(chips_dict, netlist_routes):
     plt.savefig("plots/plot1.png")
 
 
-def create_output(netlist_routes, chip, net):
+def create_output(netlist_routes, chip, net, board):
     """
     writes output to CSV file
     """
     with open(f"gates&netlists/chip_{chip}/output.csv", "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["net", "wires"])
-
         
         for line in netlist_routes:
             newrow = (int(line.start), int(line.end))
             writer.writerow([str(newrow).replace(" ",""), line])
 
-        cost = costs(netlist_routes)
+        cost = costs(board, netlist_routes)
         writer.writerow([f"chip_{chip}_net_{net}", int(cost)])
 
-
+    # TODO remove return
     return cost
     

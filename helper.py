@@ -1,66 +1,100 @@
 """
 * helper.py
-* Creates helper functions used in main.py
+* Creates helper functions used in main.py (TODO zijn nog meer bestanden)
 * 
 * Viola Koers 12213101
 * Finn Peranovic 12740454
 * Rachel de Haan 12423254
 """
 from scipy.spatial.distance import cityblock
-import sys
+
+def f_value(board, child, start, end, extra_cost):
+    """
+    Calculates f-value for a* algorithm.
+    """
+    g = route_costs(board, child)
+    h = manhattan_distance(start, end) + extra_cost
+    return g + h
+
 
 def route_costs(board, route):
+    """
+    Takes a board and a route and returns the cost of that route.
+    """
     n = len(route) - 1
-
     counts = dict()
+
     for coordinate in board.lines:
-        
-        try:
-            if coordinate in counts:
-                counts[coordinate] += 1
-            else:
-                counts[coordinate] = 1
-        except TypeError:
-            print("coordinate", coordinate)
-
-            sys.exit()
-
+        if coordinate in counts:
+            counts[coordinate] += 1
+        else:
+            counts[coordinate] = 1
 
     k = sum(value - 1 for value in counts.values())
 
     return n + 300 * k
 
+
+def costs(board, netlist):
+    """
+    Takes a board and netlist and returns the cost of the netlist. Does not call 'route_costs' to improve runtime.
+    """
+    counts = dict()
+    
+    for coordinate in board.lines:
+        if coordinate in counts:
+            counts[coordinate] += 1
+        else:
+            counts[coordinate] = 1
+
+    k = sum(value - 1 for value in counts.values())
+    n = len(board.lines) + len(netlist)
+
+    return n + 300 * k
+
+
+def manhattan_distance(start, end):
+    """
+    Returns the Manhattan distance between two coordinates.
+    """
+    a = [start[0], start[1], start[2]]
+    b = [end[0], end[1], end[2]]
+
+    return cityblock(a, b)
+
+
 def sorted_manhattan_distance(chips_dict, netlist):
+    """
+    Takes a chips dictionary and a netlist, and returns the netlist sorted by ascending Manhattan distance.
+    """
     temp = []
 
     for line in netlist:
         start_coordinate = chips_dict[line.start]
         end_coordinate = chips_dict[line.end]
 
-        a = [start_coordinate[0], start_coordinate[1], start_coordinate[2]]  
-        b = [end_coordinate[0], end_coordinate[1], end_coordinate[2]]  
+        distance = manhattan_distance(start_coordinate, end_coordinate)
 
-        temp.append((line, cityblock(a, b)))
+        temp.append((line, distance))
     
     temp = sorted(temp, key=lambda x: x[1])
 
     return [x[0] for x in temp]
 
 
-def manhattan_distance(start, end):
-    a = [start[0], start[1], start[2]]
-    b = [end[0], end[1], end[2]]
-    return cityblock(a, b)
-
 def is_not_collision(current_coordinate, board):
+    """
+    Returns whether a coordinate does not collide with another line.
+    """
     return current_coordinate not in board.lines
 
 
 def get_board_size(chips_dict):
     """
-    gets max and min coordinates
+    Calculates the extremes of the x, y and z of the board.
+    The board width and length are one bigger than the minimum and maximum coordinates of the chips.
+    The height is always 8 (level 0 to 7).
     """
-
     x_list = []
     y_list = []
 
@@ -73,42 +107,53 @@ def get_board_size(chips_dict):
     min_y = min(y_list) - 1
     max_y = max(y_list) + 1
 
-    # number of 3D layers is hardcoded (always 8)
     return min_x, max_x, min_y, max_y, 0, 7
 
 
-def costs(netlist):
+def search_range(route, end_coordinate):
     """
-    computes costs of whole netlist
+    Takes a route and a coordinate and returns the optimal search range to finish the route towards the end coordinate.
     """
-    n = 0
-    route_coords = []
-    for line in netlist:
-        if len(line.route) > 0:
-            n += len(line.route) - 1
-            route_coords.append(line.route[1:-1])
+    if route[0] > end_coordinate[0]:
+        x_range = (end_coordinate[0], route[0])
 
-    counts = dict()
-    for route in route_coords:
-        for coordinate in route:
-            if coordinate in counts:
-                counts[coordinate] += 1
-            else:
-                counts[coordinate] = 1
+    else:
+        x_range = (route[0], end_coordinate[0])
+    
+    if route[1] > end_coordinate[1]:
+        y_range = (end_coordinate[1], route[1])
+    
+    else:
+        y_range = (route[1], end_coordinate[1])
 
-    k = sum(value - 1 for value in counts.values())
-
-    return n + 300 * k
+    return x_range, y_range
 
 
 def not_found(netlist):
+    """
+    Returns the number of empty routes in a netlist.
+    """
     empty = 0
 
     for x in netlist:
         if not x.route:
             empty += 1
-    
-    print("not found: ",empty)
+
     return empty
 
 
+def find_best_child(unfinished_route_costs, end_coordinate, best_unfinished_child):
+    """
+    Finds the best (unfinished) child given current best (unfinisged) child.
+    """
+    # find child with the lowest costs
+    best_child = sorted(unfinished_route_costs, key=lambda x: x[1])[0]
+    best_child_path = best_child[0]
+
+    new_distance = manhattan_distance(best_child_path[-1], end_coordinate)
+    
+    # find child with closest manhattan distance for if route not found
+    if new_distance < best_unfinished_child[1]:
+        best_unfinished_child = (best_child_path, new_distance)
+
+    return best_unfinished_child, best_child_path
