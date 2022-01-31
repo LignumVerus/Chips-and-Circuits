@@ -4,9 +4,12 @@ from main import main
 
 def try_all():
 
-    wind = [2]
-    up = [0]
-    down = [1]
+    wind = [0,1,2,3,4]
+    up = [0,1,2,3,4]
+    down = [0,1,2,3,4]
+    options = [3, 5, 10, 15]
+    len_choices = [10, 50, 100]
+    shuffels = [1, 5, 10]
 
     netlist = [1,2,3,4,5,6,7,8,9]
     draw = False
@@ -21,17 +24,20 @@ def try_all():
         for w in wind:
             for u in up:
                 for d in down:
+                    for o in options:
+                        for ln in len_choices:
+                            for s in shuffels:
 
-                    headers.append(f"{w}, {u}, {d}")
+                                headers.append(f"{w}, {u}, {d}, {o}, {ln}, {s}")
 
-                    if x < 4:
-                        row.append(main(0, x, w, u, d, draw))
-                    
-                    elif x < 7:
-                        row.append(main(1, x, w, u, d, draw))
-                    
-                    else:
-                        row.append(main(2, x, w, u, d, draw))
+                                if x < 4:
+                                    row.append(main(0, x, w, u, d, o, ln, s, draw))
+                                
+                                elif x < 7:
+                                    row.append(main(1, x, w, u, d, o, ln, s, draw))
+                                
+                                else:
+                                    row.append(main(2, x, w, u, d, o, ln, s, draw))
 
         data.append(row)
 

@@ -21,7 +21,7 @@ from optimize import *
 
 recursion_counter = 0
 
-def find_routes(chips_dict, netlist, wind, up, down, board):
+def find_routes(chips_dict, netlist, wind, up, down, board, options = 5, len_choices = 50, shuffels = 5):
     """
     needs to return list of Line
     """
@@ -42,6 +42,8 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
         optimize(line, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z, board, overlap)
     
     # Prepare for hillclimber
+
+    empty = not_found(netlist)
    
     print("Hill climber")
 
@@ -72,14 +74,14 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
     all_routes = [x for x in range(len(netlist))]
     if manhattan_routes:
 
-        for i in range(5):
+        for i in range(shuffels):
             print(i)
             combis = []
 
             #TODO: try range 10, bigger RNG?
-            choices = [x for x in range(5)]
+            choices = [x for x in range(options)]
             # and also try range 100, more options to try
-            for _ in range(50):
+            for _ in range(len_choices):
                 #TODO: find which combis provide improvement
                 wind_option = random.choice(choices)
                 up_option = random.choice(choices)
@@ -133,8 +135,6 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
 
     # probeer x aantal keer te verbeteren (muteren)
 
-    empty = not_found(netlist)
-
     return netlist, empty
 
 #
@@ -178,13 +178,13 @@ def recursive(netlist, start_coordinate, end_coordinate, chips_dict, min_x, max_
         return route[0]
 
 
-def main(chip, net, wind = 0, up = 0, down = 0, draw = True):
+def main(chip, net, wind = 0, up = 0, down = 0, options = 5, len_choices = 50, shuffels = 5, draw = True):
     # create a board
     board = Board([])
     chips_dict = read_csv_chips(f"gates&netlists/chip_{chip}/print_{chip}.csv", board)
     netlist = read_csv_netlist(f"gates&netlists/chip_{chip}/netlist_{net}.csv")
     
-    netlist_routes = find_routes(chips_dict, netlist, wind, up, down, board)
+    netlist_routes = find_routes(chips_dict, netlist, wind, up, down, board, options, len_choices, shuffels)
 
     if draw:
         create_grid(chips_dict, netlist_routes[0])
