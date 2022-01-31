@@ -1,4 +1,3 @@
-
 """
 * options.py
 * Returns the valid directions (choices) from a current point 
@@ -7,7 +6,8 @@
 * Finn Peranovic 12740454
 * Rachel de Haan 12423254
 """
-from helper import *
+from helper import is_not_collision
+
 
 def valid_directions(
     current_coordinate, invalid_chip_coords, route, board_size, wind, up, down, board, overlap

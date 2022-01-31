@@ -11,8 +11,8 @@ import copy
 import random
 from typing import List
 
-from helper import *
-from options import *
+from helper import f_value, route_costs, manhattan_distance, search_range, find_best_child, random_combis
+from options import valid_directions
 
 def find_route(
     start_coordinate, end_coordinate, chips_dict, board_size, board, overlap, wind = 0, up = 0, down = 0):
@@ -22,6 +22,7 @@ def find_route(
     # route can not cross another chip
     invalid_chip_coords = list(chips_dict.values())
 
+    # end coordinate should be valid
     if end_coordinate in invalid_chip_coords:
         invalid_chip_coords.remove(end_coordinate)
     
@@ -40,15 +41,16 @@ def astar_algorithm(start_coordinate, end_coordinate, invalid_chip_coords, board
     best_unfinished_child = ([start_coordinate], manhattan_distance(start_coordinate, end_coordinate))
 
     while not q.empty():
+        # get first item in the queue
         route = q.get()
 
-        unfinished_route_costs = []
-
-        # if a complete route is found return: route, True, else append the route, costs tuple to unfinished_route_costs
-        # TODO: new name for a?
-        a = get_finished_route_else_update_route_costs(route, invalid_chip_coords, board_size, wind, up, down, board, overlap, end_coordinate, unfinished_route_costs)
-        if type(a) == tuple:
-            return  a
+        # if a complete route is found return: route, True
+        child_or_list = get_finished_route_or_updated_route_costs(route, invalid_chip_coords, board_size, wind, up, down, board, overlap, end_coordinate)
+        if child_or_list[1]:
+            return child_or_list
+        # save the unfinished routes and corresponding costs
+        else:
+            unfinished_route_costs = child_or_list[0]
 
         # put child with lowest cost
         if len(unfinished_route_costs) > 0:
@@ -61,11 +63,13 @@ def astar_algorithm(start_coordinate, end_coordinate, invalid_chip_coords, board
 
 
 # TODO: misschien beter functie naam? is deze funcie wel handig?
-def get_finished_route_else_update_route_costs(route, invalid_chip_coords, board_size, wind, up, down, board, overlap, end_coordinate, unfinished_route_costs):
+def get_finished_route_or_updated_route_costs(route, invalid_chip_coords, board_size, wind, up, down, board, overlap, end_coordinate):
     """
     Checks if new coordinate completes the route if so it returns the route, True. Else returns false.
     For each valid direction the function appends the new possible route, costs to the unfinished_route_costs list.
     """
+    unfinished_route_costs = []
+
     for i in valid_directions(
             route[-1], invalid_chip_coords, route, board_size, wind, up, down, board, overlap
         ):
@@ -76,90 +80,86 @@ def get_finished_route_else_update_route_costs(route, invalid_chip_coords, board
             if i[0] == end_coordinate:
                 return child, True
             
-            # append every unfinished route to the costs list
+            # append every unfinished route, cost to the list
             unfinished_route_costs.append((child, f_value(board, child, i[0], end_coordinate, i[1])))
 
-    return False
+    # if not at the end_coordinate return the updated unfinisched route costs list
+    return unfinished_route_costs, False
 
-# TODO
-def hill_climber(netlist, chips_dict, board_size, board, options, len_choices, shuffels):
-    """
-    """
-    # allow overlap for routes that could not initially be found
-    overlap = True
 
-    manhattan_routes = []
+def hill_climber(netlist, chips_dict, board_size, board, options, len_choices, shuffles):
+    """
+    First places all routes that initially could not be placed without overlap by allowing overlap.
+    Mutates the final solution multiple times to try and decrease the netlist costs using a hill climber algorithm.
+    """
 
     # find the routes that initially could not be solved without overlap
-    for index, line in enumerate(netlist):
+    netlist, board = solve_empty_routes(netlist, chips_dict, board_size, board)
+
+    # gets all routes
+    all_indexes_routes = [x for x in range(len(netlist))]
+
+    for i in range(shuffles):
+        combis = random_combis(options, len_choices)
+        random.shuffle(all_indexes_routes)
+
+        # try to make all lines again with all the different combinations for the heuristik for a*star
+        for index in all_indexes_routes:
+            for cost in combis:
+                wind = cost[0]
+                up = cost[1]
+                down = cost[2]
+
+                netlist, board = find_new_line(netlist, index, chips_dict, board_size, board, wind, up, down)
+
+    return netlist, board
+
+def solve_empty_routes(netlist, chips_dict, board_size, board):
+    """
+    Solve all empty routes with overlap allowed using a*.
+    """
+    overlap = True
+
+    for line in netlist:
         if not line.route:
             start_coordinate = chips_dict[line.start]
             end_coordinate = chips_dict[line.end]
             
             line.route = find_route(start_coordinate, end_coordinate, chips_dict, board_size, board, overlap)[0]
-
             board.lines.extend(line.route[1:-1])
-
-            manhattan_routes.append(index)
-
-    # print the start value of the costs
-    print("start value cost: ", costs(board, netlist))
-
-    # gets all route
-    all_routes = [x for x in range(len(netlist))]
-    for i in range(shuffels):
-        print(i)
-        combis = []
-
-        #TODO: try range 10, bigger RNG?
-        choices = [x for x in range(options)]
-        # and also try range 100, more options to try
-        for _ in range(len_choices):
-            #TODO: find which combis provide improvement
-            wind_option = random.choice(choices)
-            up_option = random.choice(choices)
-            down_option = random.choice(choices)
-            
-            # in virtually all cases, relatively high up-values don't result in improvement
-            while wind_option < up_option and down_option < up_option:
-                wind_option = random.choice(choices)
-                up_option = random.choice(choices)
-                down_option = random.choice(choices)
-
-            combis.append( (random.choice(choices), random.choice(choices), random.choice(choices)) )
-
-        combis = set(combis)
-        random.shuffle(all_routes)
-        for index in all_routes:
-            
-            for cost in combis:
-                wind = cost[0]
-                up = cost[1]
-                down = cost[2]
-                line = netlist[index]
-
-                old_cost = route_costs(board, line.route)
-
-                temp_board = copy.deepcopy(board)
-
-                # removes route
-                temp_board.remove_route(line)
-                
-                new_route = find_route(line.route[0], line.route[-1], chips_dict, board_size, temp_board, overlap, wind, up, down)
-
-                if new_route[1]:
-                    temp_board.lines.extend(new_route[0][1:-1])
-                    
-                    new_cost = route_costs(temp_board, new_route[0])
-
-                    if new_cost < old_cost:
-                        print("Good wind, up, down: ", wind, up, down)
-                        line.route = new_route[0]
-                        board = temp_board
-                        print("new netlist cost:", costs(board, netlist))
-
+    
     return netlist, board
 
+
+def find_new_line(netlist, index, chips_dict, board_size, board, wind, up, down):
+    """
+    Finds a new line for start and end point given line.
+    If the new line has a lower cost than the old line, it replaces the old line.
+    """
+    
+    line = netlist[index]
+    
+    # point of reverence
+    old_cost = route_costs(board, line.route)
+
+    # temp board to try new line on
+    temp_board = copy.deepcopy(board)
+    temp_board.remove_route(line)
+
+    overlap = True   
+    new_route = find_route(line.route[0], line.route[-1], chips_dict, board_size, temp_board, overlap, wind, up, down)
+
+    # if a new route is found, add the line to the temp board and calculate cost
+    if new_route[1]:
+        temp_board.lines.extend(new_route[0][1:-1])
+        new_cost = route_costs(temp_board, new_route[0])
+
+        # if the new line is cheaper, replace the old line and the old board
+        if new_cost < old_cost:
+            line.route = new_route[0]
+            board = temp_board
+    
+    return netlist, board
 
 
 def closest_line_index(route, netlist, end_coordinate, chips_dict, board_size, board, overlap):

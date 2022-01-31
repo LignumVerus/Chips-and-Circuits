@@ -1,4 +1,3 @@
-
 """
 * optimize.py
 * Optimizes a line to generate lower costs
@@ -7,8 +6,8 @@
 * Finn Peranovic 12740454
 * Rachel de Haan 12423254
 """
-from algorithm import *
-from helper import *
+from algorithm import find_route 
+from helper import manhattan_distance, route_costs
 
 
 def optimize(line, chips_dict, board_size, board, overlap = False):
@@ -18,7 +17,7 @@ def optimize(line, chips_dict, board_size, board, overlap = False):
     # route that is going to be optimzed
     current_route = line.route
 
-    # remove the route from the board   
+    # remove the route from the board
     board.remove_route(line)
 
     # optimze the route

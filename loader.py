@@ -12,9 +12,8 @@ from classes import Line, Board
 
 def read_csv_chips(filename, board):
     """
-    Reads csv print_0 and create chips.
+    Reads CSV file print_0 and creates chips.
     """
-
     with open(filename) as file:
         csvreader = csv.reader(file)
         next(csvreader)
@@ -30,11 +29,12 @@ def read_csv_chips(filename, board):
 
 def read_csv_netlist(filename):
     """
-    Reads cvc file with netlist.
+    Reads CSV file with thenetlist.
     """
     with open(filename) as file:
         csvreader = csv.reader(file)
         next(csvreader)
+
         netlist = []
 
         for number, row in enumerate(csvreader):
