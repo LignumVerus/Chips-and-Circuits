@@ -14,12 +14,13 @@ def try_all():
     netlist = [1,2,3,4,5,6,7,8,9]
     draw = False
 
-    data = []
+    headers = [0,1,2,3,4,5,6,7,8,9]
 
-    for x in netlist:
+    with open(f"gates&netlists/optimize/output.csv", "w", newline="") as f:
+        writer = csv.writer(f)
 
-        row = []
-        headers = []
+        writer.writerow(headers)
+
 
         for w in wind:
             for u in up:
@@ -27,27 +28,26 @@ def try_all():
                     for o in options:
                         for ln in len_choices:
                             for s in shuffels:
+                                row = []
+                                row.append(f"{w}, {u}, {d}, {o}, {ln}, {s}")
 
-                                headers.append(f"{w}, {u}, {d}, {o}, {ln}, {s}")
+                                for x in netlist:
 
-                                if x < 4:
-                                    row.append(main(0, x, w, u, d, o, ln, s, draw))
+                                    if x < 4:
+                                        row.append(main(0, x, w, u, d, o, ln, s, draw))
+                                    
+                                    elif x < 7:
+                                        row.append(main(1, x, w, u, d, o, ln, s, draw))
+                                    
+                                    else:
+                                        row.append(main(2, x, w, u, d, o, ln, s, draw))
                                 
-                                elif x < 7:
-                                    row.append(main(1, x, w, u, d, o, ln, s, draw))
                                 
-                                else:
-                                    row.append(main(2, x, w, u, d, o, ln, s, draw))
-
-        data.append(row)
+                                writer.writerow(row)
+                            
 
         print(x)
     
-    with open(f"gates&netlists/optimize/output.csv", "w", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow(headers)
-
-        for line in data:
-            writer.writerow(line)
+            
 
 try_all() 
