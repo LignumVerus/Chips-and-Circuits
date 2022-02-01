@@ -26,9 +26,7 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
     min_x, max_x, min_y, max_y, min_z, max_z = get_board_size(chips_dict)
 
     netlist = sorted_manhattan_distance(chips_dict, netlist)
-
-    # print(len(netlist))
-    # count = 0
+    
     not_found = 0
 
     reroute_list = []
@@ -51,16 +49,11 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
         #add longest AND empty. First reroute all empty then all longest. shuffle independently?.
         
         try:
-            #if not line.route:
-                #reroute_list.insert(0, netlist.index(line))
             if len(line.route) > multiplier * manhattan_distance(line.route[0], line.route[-1]):
-                # TODO: index opslaan in de 
                 reroute_list.append(netlist.index(line))
         except IndexError:
             pass
 
-        # count += 1
-        # print(count)
         if len(line.route) == 0:
             not_found += 1
 
@@ -98,7 +91,6 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
 
             temp_board.lines.extend(old_route[1:-1])
             temp_board_new.lines.extend(new_route[1:-1])
-            #board.lines.extend(new_route[1:-1])
 
             # go back to old board when no improvement
             if route_costs(temp_board_new, new_route) > route_costs(temp_board, old_route):
@@ -107,13 +99,11 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
                 line.route = old_route
 
                 new_board = temp_board_new
-                #board.lines.extend(old_route[1:-1])
 
             else:
                 temp_board.lines[:-len(old_route)]
                 temp_board.lines.extend(new_route[1:-1])
                 line.route = new_route
-                # gaat fout line.route = new_route
 
                 new_board = temp_board
 
@@ -124,7 +114,6 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
 
     print("START OPTIMIZING")
     
-    # optimized_routes = 0
     wind = 0
     up = 0
     down = 0
@@ -219,7 +208,6 @@ def find_random_route(
             child.append(i[0])
 
             if i[0] == end_coordinate:
-                # print(len(board.lines))
                 return child
 
             g = route_costs(board, child)
@@ -340,7 +328,3 @@ def main(chip, net, wind = 0, up = 0, down = 0, draw = True):
 
     # output how many found
     return netlist_routes[1]
-
-
-# # arg1 = chip , arg2 = net
-# main(sys.argv[1], sys.argv[2])
