@@ -10,8 +10,6 @@ import queue
 import copy
 import random
 
-from typing import List
-
 from code.helper import f_value, route_costs, manhattan_distance, search_range, find_best_child, random_combis
 from code.options import valid_directions
 
@@ -93,7 +91,6 @@ def hill_climber(netlist, chips_dict, board_size, board, options, len_choices, s
     First places all routes that initially could not be placed without overlap by allowing overlap.
     Mutates the final solution multiple times to try and decrease the netlist costs using a hill climber algorithm.
     """
-
     # find the routes that initially could not be solved without overlap
     netlist, board = solve_empty_routes(netlist, chips_dict, board_size, board)
 
@@ -117,7 +114,7 @@ def hill_climber(netlist, chips_dict, board_size, board, options, len_choices, s
 
 def solve_empty_routes(netlist, chips_dict, board_size, board):
     """
-    Solve all empty routes with overlap allowed using a*.
+    Solve all empty routes with overlap allowed using A*.
     """
     overlap = True
 
@@ -137,7 +134,6 @@ def find_new_line(netlist, index, chips_dict, board_size, board, wind, up, down)
     Finds a new line for start and end point given line.
     If the new line has a lower cost than the old line, it replaces the old line.
     """
-    
     line = netlist[index]
     
     # point of reverence

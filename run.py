@@ -9,12 +9,7 @@
 import sys
 
 from code.main import main
-# --version
 
-
-# import code.main 
-# from code import main
-# from ../main import main
 
 def input_wind():
     """
@@ -33,7 +28,6 @@ def input_wind():
         return input_wind()
         
     
-
 def input_up():
     """
     Asks user for up input heuristic. Returns up heurisic.
@@ -99,7 +93,6 @@ def input_options():
             print("Has to be 1 or higher")
             input_options()
 
-        print(options)
         return options
 
     except ValueError:
@@ -151,6 +144,5 @@ options = input_options()
 len_choices = input_len_choices()
 shuffles = input_shuffles()
 
-print("options", options)
 # run main
 print("Not found, cost: ", main(sys.argv[1], sys.argv[2], wind, up, down, True, options, len_choices, shuffles))

@@ -14,7 +14,6 @@ def try_all():
     """
     Runs all netlists for each combination of experimental values.
     """
-
     # try different variable values
     wind = [2]
     up = [0]

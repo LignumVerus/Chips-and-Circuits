@@ -1,25 +1,22 @@
 """
 * main.py
-* Finds the best routes between chips using [insert algorithm here]
+* Finds the best routes between chips using a recursive A* and hill climber
 * 
 * Viola Koers 12213101
 * Finn Peranovic 12740454
 * Rachel de Haan 12423254
 """
-# from tracemalloc import start
-
-from code.classes import Line, Board
+from code.classes import Board
 from code.helper import sorted_manhattan_distance, get_board_size, not_found
 from code.loader import read_csv_chips, read_csv_netlist
 from code.output import create_grid, create_output
 from code.algorithm import find_route, hill_climber, closest_line_index
-from code.optimize import optimize
+from code.optimize import optimize, final_optimize
 
-recursion_counter = 0
 
 def find_routes(chips_dict, netlist, wind, up, down, board, options = 5, len_choices = 50, shuffles = 5):
     """
-    needs to return list of Line
+    Needs to return list of Line.
     """
     # get board size
     board_size = get_board_size(chips_dict)
@@ -50,9 +47,11 @@ def find_routes(chips_dict, netlist, wind, up, down, board, options = 5, len_cho
     # run hill climber
     netlist, board = hill_climber(netlist, chips_dict, board_size, board, options, len_choices, shuffles)
 
-    # optimize the lines again
-    for line in netlist:
-        optimize(line, chips_dict, board_size, board)
+    print("Let's try to optimize the output")
+
+    # keep optimizing until no more optimizations
+    final_optimize(line, netlist, chips_dict, board_size, board)
+
 
     # TODO run hill climber again
 

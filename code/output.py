@@ -7,8 +7,9 @@
 * Rachel de Haan 12423254
 """
 import matplotlib.pyplot as plt
-from code.helper import costs
 import csv
+
+from code.helper import costs
 
 
 def create_grid(chips_dict, netlist_routes, chip, net):
@@ -51,6 +52,7 @@ def create_grid(chips_dict, netlist_routes, chip, net):
 
     plt.xlim([min(x_list) - 1, max(x_list) + 1])
     plt.ylim([min(y_list) - 1, max(y_list) + 1])
+    ax.set_zticks([0, 1, 2, 3, 4, 5, 6, 7])
     ax.grid(visible=True, zorder=0)
     plt.title("Circuit Board Grid")
     plt.tight_layout()
@@ -59,9 +61,9 @@ def create_grid(chips_dict, netlist_routes, chip, net):
 
 def create_output(netlist_routes, chip, net, board):
     """
-    writes output to CSV file
+    Writes output to CSV file.
     """
-    with open(f"output/chip_{chip}/output.csv", "w", newline="") as f:
+    with open(f"output/chip_{chip}/net_{net}/output.csv", "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["net", "wires"])
 
