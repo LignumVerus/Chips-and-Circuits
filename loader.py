@@ -23,9 +23,7 @@ def read_csv_chips(filename, board):
 
         # creates chips with id, x coordinate and y coordinate
         for row in csvreader:
-            # Chip(id, x, y), DOET NU NIKS!!
             chip = Chip(row[0], row[1], row[2], 0)
-            # chip_list.append(chip)
 
             # add x and y coordinate to board
             board.add_chip(chip.x, chip.y, 0)
@@ -47,7 +45,6 @@ def read_csv_netlist(filename):
 
         for number, row in enumerate(csvreader):
             try:
-                # Line(id, chip_id_1, chip_id_2, route)
                 line = Line(number, row[0], row[1], [])
                 netlist.append(line)
             except IndexError:
