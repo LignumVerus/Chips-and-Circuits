@@ -46,19 +46,6 @@ def find_routes(chips_dict, netlist, board):
     # board.add_lines(route1, route2)
     return netlist
 
-    
-    # find_route(x_start, y_start x_end, y_end)
-    # pass
-
-# algorithm route
-# *prevent self collisions
-# *prevent collisions with other routes
-# give crossing last priority (except when it would be longer than 300 steps?) (currently forbidden)
-# prioritize x and y directions over z directions
-# *sort netlist on manhattan distance
-# *place shortest manhattan distance routes first, then increasingly longer?
-# *xmax-xmin + ymax-ymin + zmax-zmin
-# 
 
 def find_route(start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z):
 
