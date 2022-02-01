@@ -46,8 +46,7 @@ def find_routes(chips_dict, netlist, wind, up, down, board):
         # add longest routes in comparison to manhattan distance to reroute list
         multiplier = 1.5
 
-        #add longest AND empty. First reroute all empty then all longest. shuffle independently?.
-        
+        #add longest
         try:
             if len(line.route) > multiplier * manhattan_distance(line.route[0], line.route[-1]):
                 reroute_list.append(netlist.index(line))
