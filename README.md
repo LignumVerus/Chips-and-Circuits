@@ -1,10 +1,19 @@
 # Chips-and-Circuits
-Chips and Circuits Group
 
-<<<<<<< HEAD
-# Test push test2
-Hoihoi
+A brief description of what this project does and who it's for
 
-# Test push
-Hoihoi
+## Getting Started
+### Prerequisites
 
+### Structure
+
+### Testing
+
+## Authors
+* Rachel de Haan
+* Viola Koers
+* Finn Peranovic
+
+## Acknowledgements
+* StackOverflow
+* minor programmeren van de UvA
