@@ -1,6 +1,6 @@
 """
 * main.py
-* Finds the best routes between chips using [insert algorithm here]
+* Finds the best routes between chips using bfs
 * 
 * Viola Koers 12213101
 * Finn Peranovic 12740454
@@ -40,19 +40,6 @@ def find_routes(chips_dict, netlist, board):
     # board.add_lines(route1, route2)
     return netlist
 
-    
-    # find_route(x_start, y_start x_end, y_end)
-    # pass
-
-# algorithm route
-# *prevent self collisions
-# *prevent collisions with other routes
-# give crossing last priority (except when it would be longer than 300 steps?) (currently forbidden)
-# prioritize x and y directions over z directions
-# *sort netlist on manhattan distance
-# *place shortest manhattan distance routes first, then increasingly longer?
-# *xmax-xmin + ymax-ymin + zmax-zmin
-# 
 
 def find_route(start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y, min_z, max_z):
 
@@ -65,8 +52,6 @@ def find_random_route(
     """
     creates random route
     """
-    # route = []
-    # route.append(start_coordinate)
 
     # gets list of chips not on start and end coordinate
     invalid_chip_coords = list(chips_dict.values())
@@ -74,10 +59,6 @@ def find_random_route(
 
     q = queue.Queue()
     q.put([start_coordinate])
-
-    # g = cost? of the route travelled
-    # h = manhattan distance between current coord and end coord
-    # f = g + h (total cost)
 
     while not q.empty():
         route = q.get()
@@ -93,33 +74,8 @@ def find_random_route(
 
             q.put(child)
 
-    # TO DO: error melding!
     return False
 
-    # while current_coordinate != end_coordinate:
-
-
-    #     # get all valid directions
-    #     choices = 
-
-    #     # update current coord with random choice
-    #     if choices:
-    #         print("full", choices)
-    #         current_coordinate = random.choice(choices)
-    #     # if there are no choices left, get directions for the previous coord, remove the bad coord and remove it from the route
-    #     else:
-    #         while not choices:
-    #             choices = valid_directions(route[-2], invalid_chip_coords, route, min_x, max_x, min_y, max_y, min_z, max_z, board)
-    #             print("empty", choices)
-    #             route.remove(current_coordinate)
-    #             choices.remove(current_coordinate)
-
-    #         current_coordinate = random.choice(choices)
-
-    #     # add coord to route
-    #     route.append(current_coordinate)
-
-    # return route
 
 def valid_directions(
     current_coordinate, invalid_chip_coords, route, min_x, max_x, min_y, max_y, min_z, max_z, board
