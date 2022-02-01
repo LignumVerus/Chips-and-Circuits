@@ -16,10 +16,10 @@ def try_all():
     """
 
     # try different variable values
-    wind = [0,1,2,3,4]
-    up = [0,1,2,3,4]
-    down = [0,1,2,3,4]
-    options = [3, 5, 10, 15]
+    wind = [2]
+    up = [0]
+    down = [1]
+    options = [5, 10]
     len_choices = [10, 50, 100]
     shuffles = [1, 5, 10]
 
@@ -42,7 +42,7 @@ def try_all():
         for w in wind:
             for u in up:
                 for d in down:
-                    for o in options:
+                    for o in options: 
                         for ln in len_choices:
                             for s in shuffles:
                                 row = []

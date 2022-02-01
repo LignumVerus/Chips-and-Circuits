@@ -52,7 +52,7 @@ def input_draw():
 def input_options():
     try:
         options = int(input("What do you want the random range of heuristics for the hill climber to be? (3-15 recommended) From 0 to: ").strip())
-        return draw
+        return options
     except ValueError:
         input_options()
 
