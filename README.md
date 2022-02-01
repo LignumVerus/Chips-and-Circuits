@@ -7,9 +7,9 @@ In dit project zijn de chips zelf al geplaatst en houden wij ons alleen bezig me
 
 Het bord is 3 dimensionaal. De hoogte is altijd 8. De niveaus lopen van 0, waar de chips op liggen, tot en met niveau 7. De lengte en breedte hangen af van de coördinaten van de chips. Hieronder is een voorbeeld van een opgeloste netlist te zien (netlist 3):  
 
-![](doc/chip_0_net3.png)  
+![Figuur 1: plot van een opgeloste netlist](doc/chip_0_net3.png)  
 
-*Figuur 1: Plot van een opgelosde netlist*
+*Figuur 1: Plot van een opgeloste netlist*
 
 ## **Aan de Slag**
 ### **Vereisten**
@@ -51,7 +51,15 @@ Deze codebase is volledig geschreven in [Python3.7.3](https://www.python.org/dow
 ### **Testen**
 Om het programma te gebruiken, is daar de volgende instructie voor nodig:  
 
-```python run.py {chip} {netlist}```
+```python run.py {chip} {netlist}```  
+
+Vervolgens zal het programma nog een aantal vragen stellen over welke variable gebruikt moeten worden. De variable waaruit gebleken is dat deze het beste resultaat opleveren, worden als suggestie aangedragen.
+
+Om alle netlists op te lossen, moet het volgende geëxecuteerd worden:
+
+```python try_all.py ```  
+
+Dit runt het programma met dezelfde variabelen voor elke netlist. Om verschillende waarden voor elke netlist te gebruiken, is het handiger om ze apart te runnen. Optioneel kunnen de variabelen in ```try_all.py``` op regel 18-23 naar wens aangepast worden.
 
 
 ## **Algoritmes**
@@ -87,12 +95,12 @@ Het hierboven omschreven probleem hebben we aangepakt door de heuristiek aan te 
 
 Deze oplossing geeft wel als probleem dat routes vaak heen en weer gaan en dus niet altijd de kortste route nemen. De routes nemen de vorm van 'koraal' aan, zoals in de afbeelding hieronder te zien:
 
-![](doc/koraal.png)  
+![Figuur 2: het koraalprobleem](doc/koraal.png)  
 
-*Figuur 2: Het koraal probleem*
+*Figuur 2: Het 'koraalprobleem'*
 
 #### **Optimimaliseren**
-Om het koraalprobleem op te lossen, gooien we elke route wanneer alle routes geplaatst zijn door een functie genaamd "*optimize*". Deze functie begint aan de uiteindes van de route (dus bij de begin- en eindchip) en werkt naar binnen toe. Elke keer probeert hij tussen de twee punten op de route te kijken of er een goedkopere route tussen die twee punten is. Mocht dat zo zijn, dan wordt dat stuk van de oude route vervangen door een nieuwe route.
+Om het 'koraalprobleem' op te lossen, gooien we elke route wanneer alle routes geplaatst zijn door een functie genaamd "*optimize*". Deze functie begint aan de uiteindes van de route (dus bij de begin- en eindchip) en werkt naar binnen toe. Elke keer probeert hij tussen de twee punten op de route te kijken of er een goedkopere route tussen die twee punten is. Mocht dat zo zijn, dan wordt dat stuk van de oude route vervangen door een nieuwe route.
 
 #### **Recursief**
 Om ons algoritme meer routes te laten vinden, hebben we een recursieve functie gemaakt. Wanneer er een route niet geplaatst kan worden, neemt deze de route die volgende de manhattan distance zo ver mogelijk gekomen is. Vervolgens gaat hij opzoek naar lijnen die tussen het laatste punt van deze route en het eindpunt liggen. Dit gebeurd op alle lagen. De eerste (en daarmee de dichtstbijzijndste) route die vanaf het laatste punt tussen het laatste punt en het eindpunt gevonden wordt, wordt verwijderd. De lijn die eerst helemaal niet gelegd kon worden probeert hij daarna opnieuw te plaatsen met A*. Lukt dit niet, wordt er weer boven aan dit verhaal begonnen. Nadat deze lijn geplaatst is, wordt de verwijderde lijn opnieuw geplaatst. Ook wanneer dit niet lukt, wordt er weer bovenaan dit verhaal begonnen.
@@ -132,9 +140,9 @@ Voor het optimale resultaat, roepen we tussendoor weer de functie *optimize* aan
 *Tabel 2: Niet gevonden routes per netlist per versie van het algoritme. Hoe hoger het netlist nummer, hoe ingewikkelder en groter de netlist*
 
 #### **Iteratief**
-Voor we een recursieve functie hadden, hebben we ook nog een andere manier geprobeerd om het algoritme te verbeteren. Dit deden we iteratief. Wanneer we een route vonden, werd er gekeken of deze significant langer was dan de Manhattan distance. De waarde die we voor 'significant groter' gekozen hadden was 1.5 keer groter. Wanneer zo veel mogelijk routes met A* met verbeterde heuristiek gelegd waren, werd een kopie van het huidige bord gemaakt. Daarna werden deze routes verwijderd van het gekopiëerde bord en opnieuw neergelegd in een willekeurige volgorde. Als d
+Voor we een recursieve functie hadden, hebben we ook nog een andere manier geprobeerd om het algoritme te verbeteren. Dit deden we iteratief. Wanneer we een route vonden, werd er gekeken of deze significant langer was dan de Manhattan distance. De waarde die we voor 'significant groter' gekozen hadden was 1.5 keer groter. Wanneer zo veel mogelijk routes met A* met verbetere heuristiek gelegd waren, werd een kopie van het huidige bord gemaakt. Daarna werden deze routes verwijderd van het gekopiëerde bord en opnieuw neergelegd in een willekeurige volgorde. Per nieuwe route, als deze route goedkoper is dan de vorige, wordt het huidige bord het gekopiëerde bord. Anders werd de route weer weggehaald en werd verder gegaan met het oude bord. Deze versie leverde echter slechtere resultaten op en werd dus geschrapt.
 
-*Deze versie van het A\* algoritme is te vinden in de branche "astar-optimize-iterative"*
+*Deze versie van het A\ algoritme is te vinden in de branche "astar-optimize-iterative"*
 
 
 ### **Hill climber**
@@ -182,4 +190,4 @@ Op dit moment is er nog veel variatie in de resultaten. Het is daarom wellicht e
 
 ## **Dankwoord**
 * Onze TA's Marleen en Pamela en alle andere TA's die ons geholpen hebben
-* minor programmeren van de UvA (2021-2022)
+* mMnor programmeren van de UvA (2021-2022)
