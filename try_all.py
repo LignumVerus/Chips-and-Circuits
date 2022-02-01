@@ -8,7 +8,7 @@
 """
 import csv
 
-from main import main
+from code.main import main
 
 def try_all():
     """

@@ -6,8 +6,8 @@
 * Finn Peranovic 12740454
 * Rachel de Haan 12423254
 """
-from algorithm import find_route 
-from helper import manhattan_distance, route_costs
+from code.algorithm import find_route 
+from code.helper import manhattan_distance, route_costs
 
 
 def optimize(line, chips_dict, board_size, board, overlap = False):

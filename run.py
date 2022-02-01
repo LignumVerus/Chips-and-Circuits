@@ -8,7 +8,13 @@
 """
 import sys
 
-from main import main
+from code.main import main
+# --version
+
+
+# import code.main 
+# from code import main
+# from ../main import main
 
 def input_wind():
     """
@@ -16,10 +22,17 @@ def input_wind():
     """
     try:
         wind = int(input("Enter heuristic for directions North, East, South, West (2 recommended): ").strip())
+
+        if wind < 0:
+            print("Has to be 0 or higher")
+            input_wind()
+        
         return wind
     except ValueError:
-        input_wind()
-
+        print("Has to be an interger")
+        return input_wind()
+        
+    
 
 def input_up():
     """
@@ -27,9 +40,15 @@ def input_up():
     """
     try:
         up = int(input("Enter heuristic for direction Up (0 recommended): ").strip())
+
+        if up < 0:
+            print("Has to be 0 or higher")
+            input_up()
+
         return up
     except ValueError:
-        input_up()
+        print("Has to be an interger")
+        return input_up()
 
 
 def input_down():
@@ -38,9 +57,15 @@ def input_down():
     """
     try:
         down = int(input("Enter heuristic for direction Down (1 recommended): ").strip())
+
+        if down < 0:
+            print("Has to be 0 or higher")
+            input_down()
+            
         return down
     except ValueError:
-        input_down()
+        print("Has to be an interger")
+        return input_down()
 
 
 def input_draw():
@@ -52,12 +77,15 @@ def input_draw():
 
         if draw == "y" :
             draw = True
-        else:
+        elif draw == "n":
             draw = False
-
+        else:
+            print("Y or N?")
+            input_draw()
+            
         return draw
     except ValueError:
-        input_draw()
+        return input_draw()
 
 
 def input_options():
@@ -66,9 +94,17 @@ def input_options():
     """
     try:
         options = int(input("What do you want the random range of heuristics for the hill climber to be? (3-15 recommended) From 0 to: ").strip())
+
+        if options < 1:
+            print("Has to be 1 or higher")
+            input_options()
+
+        print(options)
         return options
+
     except ValueError:
-        input_options()
+        print("Has to be an interger")
+        return input_options()
 
 
 def input_len_choices():
@@ -77,9 +113,16 @@ def input_len_choices():
     """
     try:
         len_choices = int(input("What is the maximum number of combinations of these options you want to try? (10-50 recommended) ").strip())
+        
+        if len_choices < 1:
+            print("Has to be 1 or higher")
+            input_len_choices()
+
         return len_choices
+
     except ValueError:
-        input_len_choices()
+        print("Has to be an interger")
+        return input_len_choices()
 
 
 def input_shuffles():
@@ -88,9 +131,15 @@ def input_shuffles():
     """
     try:
         shuffles = int(input("How many different shuffles of the netlist do you want to try for the hill climber? (1-5 recommended) ").strip())
+        if shuffles < 1:
+            print("Has to be 1 or higher")
+            input_shuffles()
+
         return shuffles
+
     except ValueError:
-        input_shuffles()
+        print("Has to be an interger")
+        return input_shuffles()
 
 
 # get user input
@@ -102,5 +151,6 @@ options = input_options()
 len_choices = input_len_choices()
 shuffles = input_shuffles()
 
+print("options", options)
 # run main
 print("Not found, cost: ", main(sys.argv[1], sys.argv[2], wind, up, down, True, options, len_choices, shuffles))

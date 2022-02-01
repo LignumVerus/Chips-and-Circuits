@@ -7,7 +7,7 @@
 * Rachel de Haan 12423254
 """
 import matplotlib.pyplot as plt
-from helper import costs
+from code.helper import costs
 import csv
 
 
@@ -54,14 +54,14 @@ def create_grid(chips_dict, netlist_routes, chip, net):
     ax.grid(visible=True, zorder=0)
     plt.title("Circuit Board Grid")
     plt.tight_layout()
-    plt.savefig(f"../output/plots/chip_{chip}_net{net}.png")
+    plt.savefig(f"output/plots/chip_{chip}_net{net}.png")
 
 
 def create_output(netlist_routes, chip, net, board):
     """
     writes output to CSV file
     """
-    with open(f"../output/chip_{chip}/output.csv", "w", newline="") as f:
+    with open(f"output/chip_{chip}/output.csv", "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["net", "wires"])
 

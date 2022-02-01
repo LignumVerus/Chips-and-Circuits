@@ -6,7 +6,7 @@
 * Finn Peranovic 12740454
 * Rachel de Haan 12423254
 """
-from helper import is_not_collision
+from code.helper import is_not_collision
 
 
 def valid_directions(

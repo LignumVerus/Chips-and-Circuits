@@ -6,14 +6,14 @@
 * Finn Peranovic 12740454
 * Rachel de Haan 12423254
 """
-from tracemalloc import start
+# from tracemalloc import start
 
-from classes import Line, Board
-from helper import sorted_manhattan_distance, get_board_size, not_found
-from loader import read_csv_chips, read_csv_netlist
-from output import create_grid, create_output
-from algorithm import find_route, hill_climber, closest_line_index
-from optimize import optimize
+from code.classes import Line, Board
+from code.helper import sorted_manhattan_distance, get_board_size, not_found
+from code.loader import read_csv_chips, read_csv_netlist
+from code.output import create_grid, create_output
+from code.algorithm import find_route, hill_climber, closest_line_index
+from code.optimize import optimize
 
 recursion_counter = 0
 
@@ -102,8 +102,8 @@ def reroute(netlist, start_coordinate, end_coordinate, chips_dict, board_size, w
 def main(chip, net, wind = 0, up = 0, down = 0, draw = True, options = 5, len_choices = 50, shuffles = 5):
     # create a board
     board = Board([])
-    chips_dict = read_csv_chips(f"../data/chip_{chip}/print_{chip}.csv", board)
-    netlist = read_csv_netlist(f"../data/chip_{chip}/netlist_{net}.csv")
+    chips_dict = read_csv_chips(f"data/chip_{chip}/print_{chip}.csv", board)
+    netlist = read_csv_netlist(f"data/chip_{chip}/netlist_{net}.csv")
     
     netlist_routes = find_routes(chips_dict, netlist, wind, up, down, board, options, len_choices, shuffles)
 

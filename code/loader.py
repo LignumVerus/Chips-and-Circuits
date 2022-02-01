@@ -8,7 +8,7 @@
 """
 import csv
 
-from classes import Line, Board
+from code.classes import Line, Board
 
 def read_csv_chips(filename, board):
     """

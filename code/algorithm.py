@@ -9,10 +9,11 @@
 import queue
 import copy
 import random
+
 from typing import List
 
-from helper import f_value, route_costs, manhattan_distance, search_range, find_best_child, random_combis
-from options import valid_directions
+from code.helper import f_value, route_costs, manhattan_distance, search_range, find_best_child, random_combis
+from code.options import valid_directions
 
 def find_route(
     start_coordinate, end_coordinate, chips_dict, board_size, board, overlap, wind = 0, up = 0, down = 0):
