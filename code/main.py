@@ -7,10 +7,6 @@
 * Rachel de Haan 12423254
 """
 from tracemalloc import start
-import numpy as np 
-import random
-import queue
-import copy
 
 from classes import Line, Board
 from helper import sorted_manhattan_distance, get_board_size, not_found
