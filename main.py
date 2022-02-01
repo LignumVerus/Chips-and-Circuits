@@ -79,14 +79,6 @@ def find_routes(chips_dict, netlist):
     # board.add_lines(route1, route2)
     return netlist
 
-    # find_route(x_start, y_start x_end, y_end)
-    # pass
-
-
-# algorithm route
-# def find_route(x_start, y_start x_end, y_end):
-#     pass
-
 
 def find_random_route(
     start_coordinate, end_coordinate, chips_dict, min_x, max_x, min_y, max_y
