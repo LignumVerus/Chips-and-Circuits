@@ -7,7 +7,9 @@ In dit project zijn de chips zelf al geplaatst en houden wij ons alleen bezig me
 
 Het bord is 3 dimensionaal. De hoogte is altijd 8. De niveaus lopen van 0, waar de chips op liggen, tot en met niveau 7. De lengte en breedte hangen af van de coördinaten van de chips. Hieronder is een voorbeeld van een opgeloste netlist te zien (netlist 3):  
 
-![](doc/chip_0_net3.png)
+![](doc/chip_0_net3.png)  
+
+*Figuur 1: Plot van een opgelosde netlist*
 
 ## **Aan de Slag**
 ### **Vereisten**
@@ -20,14 +22,16 @@ Deze codebase is volledig geschreven in [Python3.7.3](https://www.python.org/dow
   * .py-bestanden 
 * **data:**
   * **chip_0:**
-    * netlist.csv-bestanden en print.csv-bestanden 
+    * netlist.csv-bestanden  en print.csv-bestanden 
   * **chip_1:**
     * netlist.csv-bestanden en print.csv-bestanden 
   * **chip_2:**
     * netlist.csv-bestanden en print.csv-bestanden
+* **doc:**
+  * afbeeldingen voor in de README.md
 * **output:**
   * **chip_0:**
-    * output.csv-bestand van netlist 1-3
+    * output.csv-bestand van netlist 1-3 
   * **chip_1:**
     * output.csv-bestand van netlist 4-6
   * **chip_2:**
@@ -36,10 +40,10 @@ Deze codebase is volledig geschreven in [Python3.7.3](https://www.python.org/dow
     * output.csv-bestand 
   * **plots:**
     * plot.png-bestanden
-  * README.md
-  * requirements.txt
-  * run.py (lost de gewenste netlist op)
-  * try_all.py (lost alle netlists op)  
+* README.md
+* requirements.txt
+* run.py (lost de gewenste netlist op)
+* try_all.py (lost alle netlists op)  
 
  De netlist.csv-bestanden bevatten de informatie welke chips met elkaar verbonden moeten worden. De print.csv-bestanden bevatten de x,y-coordinaten van de chips in de netslisten. De output.csv-bestanden bevatten de coordinaten van de routes die zijn gelegd. En de plot.png-bestanden bevatten de plots die bij deze routes horen.
 
@@ -62,10 +66,10 @@ Om aan het random algoritme iets meer restricties toe te voegen, hebben we eerst
 *Deze algoritmes zijn te vinden in de branches "dfs" en "bfs"*
 
 ### **A\***
-Om het algoritme iets sneller te laten werken, hebben we het BFS algoritme omschreven naar een A*-algoritme. Ook hier leggen we de routes op volgorde van de kleinste naar de grootste manhattan distance. Voor de heurustiek gebruiken we de Manhattan distance. Dit werkte vrij goed. Wat alleen opviel, is dat routes vrij weinig gebruik maakte van andere lagen, waardoor het op laag 0 erg vast kwam te liggen. Dit zorgde er voor dat er vrij veel routes op het laatste nog steeds niet gelegd worden. Er was in die gevallen simpelweg geen mogelijkheid om van de begin- naar de eindchip te komen zonder andere routes te kruisen. 
+Om het algoritme iets sneller te laten werken, hebben we het BFS-algoritme omschreven naar een A*-algoritme. Ook hier leggen we de routes op volgorde van de kleinste naar de grootste manhattan distance. Voor de heuristiek gebruiken we de Manhattan distance. Dit werkte vrij goed. Wat alleen opviel, is dat routes vrij weinig gebruik maakte van andere lagen, waardoor het op laag 0 erg vast kwam te liggen. Dit zorgde er voor dat er vrij veel routes op het laatste nog steeds niet gelegd worden. Er was in die gevallen simpelweg geen mogelijkheid om van de begin- naar de eindchip te komen zonder andere routes te kruisen. 
 
-#### **Extra cost**
-Het hierboven omschreven probleem hebben we aangepakt door de herustiek aan te passen. Eerst gebruikten we dus de Manhattan distance, maar aangezien alle chips op de nulde verdieping liggen, is het nooit voordelig om naar een andere laag te gaan. Daarom hebben we bij de Manhattan distance een extra koste toegevoegd. Op dezelfde laag blijven geeft hogere extra kosten dan wanneer een route naar een andere laag gaat. Toen we dit hadden geïmplementeerd en voor verschillende extra kosten hadden getest, werden er veel meer routes gevonden. De optimale extra kosten bleek voor op dezelfde laag blijven 2, voor omhoog gaan 0 en voor naar beneden gaan 1. Zie **Experiment** voor meer details.
+#### **Extra kosten**
+Het hierboven omschreven probleem hebben we aangepakt door de heuristiek aan te passen. Eerst gebruikten we dus de Manhattan distance, maar aangezien alle chips op de nulde verdieping liggen, is het nooit voordelig om naar een andere laag te gaan. Daarom hebben we bij de Manhattan distance een extra kostte toegevoegd. Op dezelfde laag blijven geeft hogere extra kosten dan wanneer een route naar een andere laag gaat. Toen we dit hadden geïmplementeerd en voor verschillende extra kosten hadden getest, werden er veel meer routes gevonden. De optimale extra kosten bleek voor op dezelfde laag blijven 2, voor omhoog gaan 0 en voor naar beneden gaan 1. Zie **Experiment** voor meer details.
 
 | Netlist  | A*       | A* met verbeterde heuristiek |
 | -------- | -------- | ---------------------------- |
@@ -79,17 +83,19 @@ Het hierboven omschreven probleem hebben we aangepakt door de herustiek aan te p
 | 8        | 27       | 23     |
 | 9        | 43       | 30     |  
 
-*Niet gevonden routes per netlist. Hoe hoger het netlist nummer, hoe ingewikkelder en groter de netlist*
+*Tabel 1: Niet gevonden routes per netlist per versie van het algoritme. Hoe hoger het netlist nummer, hoe ingewikkelder en groter de netlist*
 
 Deze oplossing geeft wel als probleem dat routes vaak heen en weer gaan en dus niet altijd de kortste route nemen. De routes nemen de vorm van 'koraal' aan, zoals in de afbeelding hieronder te zien:
 
-![Figure](doc/koraal.png)
+![](doc/koraal.png)  
 
-#### **Optimize**
-Om het koraalprobleem op te lossen, gooien we elke route wanneer alle routes geplaatst zijn door een functie genaamd "optimize". Deze functie begint aan de uiteindes van de route (dus bij de begin- en eindchip) en werkt naar binnen toe. Elke keer probeert hij tussen de twee punten op de route te kijken of er een efficientere route tussen die twee punten is. Mocht dat zo zijn, dan wordt dat stuk van de oude route vervangen door een nieuwe route.
+*Figuur 2: Het koraal probleem*
+
+#### **Optimimaliseren**
+Om het koraalprobleem op te lossen, gooien we elke route wanneer alle routes geplaatst zijn door een functie genaamd "*optimize*". Deze functie begint aan de uiteindes van de route (dus bij de begin- en eindchip) en werkt naar binnen toe. Elke keer probeert hij tussen de twee punten op de route te kijken of er een goedkopere route tussen die twee punten is. Mocht dat zo zijn, dan wordt dat stuk van de oude route vervangen door een nieuwe route.
 
 #### **Recursief**
-Om ons alogoritme meer routes te laten vinden, hebben we een recursieve functie gemaakt. Wanneer er een route niet geplaatst kan worden, neemt deze de route die volgende de manhattan distance zo ver mogelijk gekomen is. Vervolgens gaat hij opzoek naar lijnen die tussen het laatste punt van deze route en het eindpunt liggen. Dit gebeurd op alle lagen. De eerste (en daarmee de dichtbijzijnste) route die vanaf het laatste punt tussen het laatste punt en het eindpunt gevonden wordt, wordt verwijderd. De lijn die eerst helemaal niet gelegd kon worden probeert hij daarna opnieuw te plaatsen met A*. Lukt dit niet, wordt er weer boven aan dit verhaal begonnen. Nadat deze lijn geplaatst is, wordt de verwijderde lijn opnieuw geplaatst. Ook wanneer dit niet lukt, wordt er weer bovenaan dit verhaal begonnen.
+Om ons algoritme meer routes te laten vinden, hebben we een recursieve functie gemaakt. Wanneer er een route niet geplaatst kan worden, neemt deze de route die volgende de manhattan distance zo ver mogelijk gekomen is. Vervolgens gaat hij opzoek naar lijnen die tussen het laatste punt van deze route en het eindpunt liggen. Dit gebeurd op alle lagen. De eerste (en daarmee de dichtstbijzijndste) route die vanaf het laatste punt tussen het laatste punt en het eindpunt gevonden wordt, wordt verwijderd. De lijn die eerst helemaal niet gelegd kon worden probeert hij daarna opnieuw te plaatsen met A*. Lukt dit niet, wordt er weer boven aan dit verhaal begonnen. Nadat deze lijn geplaatst is, wordt de verwijderde lijn opnieuw geplaatst. Ook wanneer dit niet lukt, wordt er weer bovenaan dit verhaal begonnen.
 
 ```
 def recursieve_functie(a,b):
@@ -109,7 +115,7 @@ def recursieve_functie(a,b):
       recursieve_functie(a_r2, b r2)    
 ```    
 
-Voor het optimale resultaat, roepen we tussendoor weer de functie optimize aan voor een specifieke lijn. Uiteindelijk konden door deze methode weer meer routes gelegd worden, zoals in de tabel hieronder te zien is:
+Voor het optimale resultaat, roepen we tussendoor weer de functie *optimize* aan voor een specifieke lijn. Uiteindelijk konden door deze methode weer meer routes gelegd worden, zoals in de tabel hieronder te zien is:
 
 | Netlist  | A*       | A* met verbeterde heuristiek | A* met optimize en recursieve functie |
 | -------- | -------- | ---------------------------- | ---------------------------- |
@@ -123,8 +129,10 @@ Voor het optimale resultaat, roepen we tussendoor weer de functie optimize aan v
 | 8        | 27       | 23     | 21 |
 | 9        | 43       | 30     | 27 |
 
+*Tabel 2: Niet gevonden routes per netlist per versie van het algoritme. Hoe hoger het netlist nummer, hoe ingewikkelder en groter de netlist*
+
 #### **Iteratief**
-Voor we een recursieve functie hadden, hebben we ook nog een andere manier geprobeerd om het algoritme te verbeteren. Dit deden we iteratief. Wanneer we een route vonden, werd er gekeken of deze significant langer was dan de Manhattan distance. De waarde die we voor 'significant groter' gekozen hadden was 1.5 keer groter. Wanneer zo veel mogelijk routes met A* met verbetere heuristiek gelegd waren, werd een kopie van het huidige bord gemaakt. Daarna werden deze routes verwijderd van het gekopiëerde bord en opnieuw neergelegd in een willekeurige volgorde. Als d
+Voor we een recursieve functie hadden, hebben we ook nog een andere manier geprobeerd om het algoritme te verbeteren. Dit deden we iteratief. Wanneer we een route vonden, werd er gekeken of deze significant langer was dan de Manhattan distance. De waarde die we voor 'significant groter' gekozen hadden was 1.5 keer groter. Wanneer zo veel mogelijk routes met A* met verbeterde heuristiek gelegd waren, werd een kopie van het huidige bord gemaakt. Daarna werden deze routes verwijderd van het gekopiëerde bord en opnieuw neergelegd in een willekeurige volgorde. Als d
 
 *Deze versie van het A\* algoritme is te vinden in de branche "astar-optimize-iterative"*
 
@@ -146,6 +154,8 @@ De gebruiker bepaalt een aantal variabelen in de hill climber. De hill climber g
 | 8        | 76926    | 44012  |
 | 9        | 114987   | 74295  |
 
+*Tabel 3: Kosten per netlist per versie van het algoritme. Hoe hoger het netlist nummer, hoe ingewikkelder en groter de netlist. Versie A = A\* met optimize en recursieve functie. Wanneer de laatste paar lijnen echt niet gelegd kunnen worden, worden deze op de kortst mogelijke manier gelegd (met behulp van A\*). Het maakt dan niet uit als ze andere lijnen kruisen. Versie B = Versie A, maar na afloop nog een hill climber algoritme.*
+
 
 ## **Experiment**
 Om te testen welke waarden voor verschillende gebruikte variabelen optimaal zijn om in de beste versie de kosten nog verder te verlagen, zijn verschillende combinaties getest.
@@ -161,8 +171,6 @@ extra kosten 201 gaf wel betere oplossingen maar loste niet meer netlists op
 optimize maakte bestaande routes korter nadat de routes gelegd werd wat een kleine winst in de kosten opleverde
 recursieve functie loste netlist 3 op en verbeterde andere netlists
 voor hillclimber werden overige routes volgens Manhattan distance gelegd, daarna hillclimber, die leverde de volgende kosten op:
-
-
 
 ## **Idee voor in de toekomst**
 Op dit moment is er nog veel variatie in de resultaten. Het is daarom wellicht een goed idee om uit te zoeken of er een patroon is bij welke random configuraties in de hill climber de beste resultaten gevonden worden.
