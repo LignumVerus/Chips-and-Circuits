@@ -26,20 +26,12 @@ class Line:
 
 class Board:
     def __init__(self, lines):
-        # {(1,1): (chip_id, [line_id1, line_id2]}
-        # self.board = {}
         self.lines = lines
 
     # add chip to dictionary with coordinates as key
     def add_chip(self, chip_x, chip_y,chip_z):
-        # TODO: add chip to dictonary
-        # if coordinate not in dict, add to dict and add chip
-        # else update entry
         pass
 
     # add line to dictionary with coordinates as key
     def add_line(self, line):
-        # TODO: add line to dictionary
-        # if coordinate not in dict, add to dict and add line
-        # else update entry
         pass
