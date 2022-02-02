@@ -93,7 +93,7 @@ def update_route(route, new_route, i, j):
     if len(route[:i]) > 0 and len(route[j:]) > 0:
         temp = route[:i]
         temp.extend(new_route)
-        temp.extend(route[j + 1 :])
+        temp.extend(route[j + 1:])
 
     # update the end of the old route
     elif len(route[:i]) > 0:
@@ -102,7 +102,7 @@ def update_route(route, new_route, i, j):
 
     # update the beginning of the old route
     elif len(route[j:]) > 0:
-        temp = route[j + 1 :]
+        temp = route[j + 1:]
         new_route.extend(temp)
         temp = new_route
 

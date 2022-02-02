@@ -1,7 +1,7 @@
 """
 * algorithm.py
 * Tries to find a route from the start coordinate of a chip to the end coordinate of the chip with A* algoritm
-* 
+*
 * Viola Koers 12213101
 * Finn Peranovic 12740454
 * Rachel de Haan 12423254
@@ -9,7 +9,7 @@
 import queue
 import copy
 import random
-
+ 
 from code.helper import (
     f_value,
     route_costs,
@@ -33,7 +33,7 @@ def find_route(
     down=0,
 ):
     """
-    Takes a start coordinate, end coordinate, chips dictionary, board coordinate extremes, heuristics, board and overlap.
+    Finds route based on: start coordinate, end coordinate, chips dictionary, board coordinate extremes, heuristics, board and overlap.
     """
     # route can not cross another chip
     invalid_chip_coords = list(chips_dict.values())

@@ -158,11 +158,12 @@ def reroute(
 def main(
     chip, net, wind=0, up=0, down=0, draw=True, options=5, len_choices=50, shuffles=5
 ):
-    # create a board
-    board = Board([])
-    chips_dict = read_csv_chips(f"data/chip_{chip}/print_{chip}.csv", board)
+
+    chips_dict = read_csv_chips(f"data/chip_{chip}/print_{chip}.csv")
     netlist = read_csv_netlist(f"data/chip_{chip}/netlist_{net}.csv")
 
+    # create a board
+    board = Board([])
     netlist_routes = find_routes(
         chips_dict, netlist, wind, up, down, board, options, len_choices, shuffles
     )

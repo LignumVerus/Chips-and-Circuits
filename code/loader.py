@@ -8,10 +8,10 @@
 """
 import csv
 
-from code.classes import Line, Board
+from code.classes import Line
 
 
-def read_csv_chips(filename, board):
+def read_csv_chips(filename):
     """
     Reads CSV file print_0 and creates chips.
     """
