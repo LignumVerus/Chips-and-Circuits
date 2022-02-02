@@ -56,9 +56,8 @@ def optimize_route(route, chips_dict, board_size, board, overlap = False):
     Tries to find one optimization for a route.
     """
     # loop from outer ends of route to the middle
-    middle = int(len(route)/2)
-    for i, point_one in enumerate(route[:middle]):
-        for j, point_two in reversed(list(enumerate(route[middle:]))):
+    for i, point_one in enumerate(route):
+        for j, point_two in reversed(list(enumerate(route[i:]))):
             distance = manhattan_distance(point_one, point_two)
             route_distance = j - i
 
