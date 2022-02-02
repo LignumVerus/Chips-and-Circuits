@@ -19,7 +19,7 @@ def create_grid(chips_dict, netlist_routes, chip, net):
     fig = plt.figure()
     ax = fig.add_subplot(projection="3d")
 
-    # Prepare chips for drawing
+    # prepare chips for drawing
     id_list = chips_dict.keys()
     x_list = []
     y_list = []
@@ -30,7 +30,7 @@ def create_grid(chips_dict, netlist_routes, chip, net):
         y_list.append(coordinate[1])
         z_list.append(coordinate[2])
 
-    # Prepare routes for drawing
+    # prepare routes for drawing
     for lines in netlist_routes:
         x_lines = []
         y_lines = []
@@ -41,10 +41,10 @@ def create_grid(chips_dict, netlist_routes, chip, net):
             y_lines.append(line[1])
             z_lines.append(line[2])
 
-        # Draw the routes
+        # draw the routes
         ax.plot(x_lines, y_lines, z_lines, linewidth=2.5)
 
-    # Draw the chips
+    # draw the chips
     ax.scatter(x_list, y_list, z_list, zorder=2, s=300)
 
     for i, txt in enumerate(id_list):
