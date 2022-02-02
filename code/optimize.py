@@ -14,7 +14,7 @@ from code.helper import manhattan_distance, route_costs, costs
 
 def final_optimize(line, netlist, chips_dict, board_size, board):
     """
-    Optimizes the board until there is differences in costs
+    Optimizes the board until there is a improvement in cost
     """
     old_cost = costs(board, netlist)
 
