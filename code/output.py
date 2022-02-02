@@ -17,8 +17,8 @@ def create_grid(chips_dict, netlist_routes, chip, net):
     Visualizes a 3D grid with the chips and the netlist routes.
     """
     fig = plt.figure()
-    ax = fig.add_subplot(projection='3d')
-    
+    ax = fig.add_subplot(projection="3d")
+
     # Prepare chips for drawing
     id_list = chips_dict.keys()
     x_list = []
@@ -69,10 +69,9 @@ def create_output(netlist_routes, chip, net, board):
 
         for line in netlist_routes:
             newrow = (int(line.start), int(line.end))
-            writer.writerow([str(newrow).replace(" ",""), line])
+            writer.writerow([str(newrow).replace(" ", ""), line])
 
         cost = costs(board, netlist_routes)
         writer.writerow([f"chip_{chip}_net_{net}", int(cost)])
 
-    # TODO remove return
     return cost

@@ -10,6 +10,7 @@ import csv
 
 from code.classes import Line, Board
 
+
 def read_csv_chips(filename, board):
     """
     Reads CSV file print_0 and creates chips.
