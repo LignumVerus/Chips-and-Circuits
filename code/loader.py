@@ -30,7 +30,7 @@ def read_csv_chips(filename):
 
 def read_csv_netlist(filename):
     """
-    Reads CSV file with thenetlist.
+    Reads CSV file containing the netlist.
     """
     with open(filename) as file:
         csvreader = csv.reader(file)

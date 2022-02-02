@@ -163,8 +163,8 @@ def find_best_child(unfinished_route_costs, end_coordinate, best_unfinished_chil
 
 def random_combis(options, len_choices):
     """
-    Returns a list of lenght len_choices with tuples with 3 random numbers in range options.
-    The number in the middle of the tuple can never be the highest
+    Returns a list of length len_choices with tuples containing 3 random values in range options.
+    The middle number ('up') of the tuple can never be the highest
     """
     # TODO: try range 10, bigger RNG?
     choices = [x for x in range(options)]
