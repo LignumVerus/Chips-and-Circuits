@@ -32,7 +32,7 @@ def try_all():
     headers = [0,1,2,3,4,5,6,7,8,9]
 
     # open output file to overwrite
-    with open(f"/output/optimize/output.csv", "w", newline="") as f:
+    with open(f"output/optimize/output.csv", "w", newline="") as f:
         writer = csv.writer(f)
 
         writer.writerow(headers)
