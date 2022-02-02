@@ -175,7 +175,7 @@ Vervolgens is gekeken wat de beste combinatie van options, len_choices, en shuff
 
 ![Figuur 3: kosten per combinatie. Goedkoopste combinatie verschilt per netlist](doc/Experiment_graph.png)
 
-*Figuur 3: kosten per combinatie. Goedkoopste combinatie verschilt per netlist. Bij bijvoorbeeld de grijze lijn, '10,50,1', stelt 10 de options voor, 50 de len_choices en 1 het aantal shuffles*
+*Figuur 3: kosten per combinatie. Goedkoopste combinatie verschilt per netlist. Hierbij hebben de namen de de waarden van de onderzochte variabelen. Bij bijvoorbeeld de grijze lijn, '10,50,1', stelt 10 de options voor, 50 de len_choices en 1 het aantal shuffles.*
 
 ## **Resultaten**  
 *Als reverentiepunt gebruiken we netlist 9, de meest ingewikkelde en langste netlist.*
