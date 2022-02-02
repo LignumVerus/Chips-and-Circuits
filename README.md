@@ -175,7 +175,7 @@ random te vaak runnen voor goede resultaten
 DFS doet te te lang en sloot zichzelf in
 BFS deed te lang, ging wel voor kortste route maar sloot zichzelf ook in
 A* ook vaak in de knoop want bleef vaak op niveau 0
-extra kosten 201 gaf wel betere oplossingen maar loste niet meer netlists op
+extra kosten 201 vind wel meer routes, maar loste niet meer netlists op
 optimize maakte bestaande routes korter nadat de routes gelegd werd wat een kleine winst in de kosten opleverde
 recursieve functie loste netlist 3 op en verbeterde andere netlists
 voor hillclimber werden overige routes volgens Manhattan distance gelegd, daarna hillclimber, die leverde de volgende kosten op:
