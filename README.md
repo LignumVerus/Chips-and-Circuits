@@ -45,7 +45,7 @@ Deze codebase is volledig geschreven in [Python3.7.3](https://www.python.org/dow
 * run.py (lost de gewenste netlist op)
 * try_all.py (lost alle netlists op)  
 
- De netlist.csv-bestanden bevatten de informatie welke chips met elkaar verbonden moeten worden. De print.csv-bestanden bevatten de x,y-coordinaten van de chips in de netslisten. De output.csv-bestanden bevatten de coordinaten van de routes die zijn gelegd. En de plot.png-bestanden bevatten de plots die bij deze routes horen.
+ De netlist.csv-bestanden bevatten de informatie welke chips met elkaar verbonden moeten worden. De print.csv-bestanden bevatten de x,y-coördinaten van de chips in de netslisten. De output.csv-bestanden bevatten de coördinaten van de routes die zijn gelegd. En de plot.png-bestanden bevatten de plots die bij deze routes horen.
 
 
 ### **Testen**
@@ -53,7 +53,7 @@ Om het programma te gebruiken, is daar de volgende instructie voor nodig:
 
 ```python run.py {chip} {netlist}```  
 
-Vervolgens zal het programma nog een aantal vragen stellen over welke variable gebruikt moeten worden. De variable waaruit gebleken is dat deze het beste resultaat opleveren, worden als suggestie aangedragen.
+Vervolgens zal het programma nog een aantal vragen stellen over welke variabele gebruikt moeten worden. De variabele waaruit gebleken is dat deze het beste resultaat opleveren, worden als suggestie aangedragen.
 
 Om alle netlists op te lossen, moet het volgende geëxecuteerd worden:
 
@@ -140,7 +140,7 @@ Voor het optimale resultaat, roepen we tussendoor weer de functie *optimize* aan
 *Tabel 2: Niet gevonden routes per netlist per versie van het algoritme. Hoe hoger het netlist nummer, hoe ingewikkelder en groter de netlist*
 
 #### **Iteratief**
-Voor we een recursieve functie hadden, hebben we ook nog een andere manier geprobeerd om het algoritme te verbeteren. Dit deden we iteratief. Wanneer we een route vonden, werd er gekeken of deze significant langer was dan de Manhattan distance. De waarde die we voor 'significant langer' gekozen hadden was 1.5 keer groter. Wanneer zo veel mogelijk routes met A* met verbetere heuristiek gelegd waren, werd een kopie van het huidige bord gemaakt. Daarna werden deze routes verwijderd van het gekopiëerde bord en opnieuw neergelegd in een willekeurige volgorde. Per nieuwe route, als deze route goedkoper is dan de vorige, wordt het huidige bord het gekopiëerde bord. Anders werd de route weer weggehaald en werd verder gegaan met het oude bord. Deze versie leverde echter slechtere resultaten op en werd dus geschrapt.
+Voor we een recursieve functie hadden, hebben we ook nog een andere manier geprobeerd om het algoritme te verbeteren. Dit deden we iteratief. Wanneer we een route vonden, werd er gekeken of deze significant langer was dan de Manhattan distance. De waarde die we voor 'significant langer' gekozen hadden was 1.5 keer groter. Wanneer zo veel mogelijk routes met A* met verbetere heuristiek gelegd waren, werd een kopie van het huidige bord gemaakt. Daarna werden deze routes verwijderd van het gekopieerde bord en opnieuw neergelegd in een willekeurige volgorde. Per nieuwe route, als deze route goedkoper is dan de vorige, wordt het huidige bord het gekopieerde bord. Anders werd de route weer weggehaald en werd verder gegaan met het oude bord. Deze versie leverde echter slechtere resultaten op en werd dus geschrapt.
 
 *Deze versie van het A\* algoritme is te vinden in de branche "astar-optimize-iterative"*
 
@@ -171,15 +171,15 @@ De variabelen waar naar gekeken is zijn de strafkosten voor de richtingen (de wi
 
 Eerst is onderzocht wat de beste wind, up, down is door verschillende combinaties van wind, up, down te runnen en kosten te berekenen voor elke netlist. Voor wind, up en down is gekeken naar elke combinatie van waarden van 0 tot en met 4. Dit zijn dus 5\*5\*5 = 125 mogelijke combinaties. Na meerdere keren runnen zijn we er achter gekomen dat als up de hoogste waarde heeft, dat dit slechte resultaten levert. Ook zijn we er achter gekomen dat resultaten waarbij de verhouding tussen wind up en down vergelijkbaar is als bij 2, 0 en 1, respectievelijk, dit significante verschillen opleverde. Het aantal lijnen die niet gevonden kunnen worden met het A* algoritme met de recursieve functie, is bijna nooit lager dan bij deze verdeling van de extra kosten. Dit is ook te zien in het bestand ```optimize/wind_up_down.csv```. (Let op, een lage kosten in dit bestand zegt niet heel veel, als veel lijnen niet gelegd kunnen worden, zijn de kosten automatisch lager.) Daarom hebben we gekozen voor wind = 2, up = 0 en down = 1. Voor sommige netlisten is een andere combinatie gunstiger. Zo worden voor netlist 7 bijvoorbeeld nog meer routes gevonden bij de combinatie wind = 3, up = 0 en down = 3.
 
-Vervolgens is gekeken wat de beste combinatie van options, len_choices, en shuffles zijn. Hierbij is gekeken naar de waarden 5 en 10 voor options, 10, 50 en 100 voor len_choices en 1 en 5 voor shuffles. Dit zijn dus 2\*3\*2 = 12 mogelijke combinaties. De exacte resulaten van alle combinaties zijn te vinden in het bestand ```optimize/options_len_choices_shuffles.csv```. De beste variablen lijken de volgende te zijn: options = 5, len_choices = 100, shuffles = 1. Het verschilt echter enigsinds per netlist. Dit is duidelijk te zien in onderstaande afbeelding:
+Vervolgens is gekeken wat de beste combinatie van options, len_choices, en shuffles zijn. Hierbij is gekeken naar de waarden 5 en 10 voor options, 10, 50 en 100 voor len_choices en 1 en 5 voor shuffles. Dit zijn dus 2\*3\*2 = 12 mogelijke combinaties. De exacte resultaten van alle combinaties zijn te vinden in het bestand ```optimize/options_len_choices_shuffles.csv```. De beste variabelen lijken de volgende te zijn: options = 5, len_choices = 100, shuffles = 1. Het verschilt echter enigszins per netlist. Dit is duidelijk te zien in onderstaande afbeelding:
 
 ![Figuur 3: kosten per combinatie. Goedkoopste combinatie verschilt per netlist](doc/Experiment_Graph.png)
 
-*Figuur 3: kosten per combinatie. Goedkoopste combinatie verschilt per netlist. Hierbij hebben de namen de de waarden van de onderzochte variabelen. Bij bijvoorbeeld de grijze lijn, '10,50,1', stelt 10 de options voor, 50 de len_choices en 1 het aantal shuffles.*
+*Figuur 3: kosten per combinatie. Goedkoopste combinatie verschilt per netlist. Hierbij hebben de namen de waarden van de onderzochte variabelen. Bij bijvoorbeeld de grijze lijn, '10,50,1', stelt 10 de options voor, 50 de len_choices en 1 het aantal shuffles.*
 
 ## **Resultaten**  
-*Als reverentiepunt gebruiken we netlist 9, de meest ingewikkelde en langste netlist.*
-Bij het random algortime krijgen we hele hoge kosten voor netlist 9. Lijn kruisten namelijk zichzelf en andere lijnen continue. Met het gebruik van 8 mogelijke lagen hebben we netlist 9, 6 keer gerund. Gemiddeld kwam hier een koste van 68.538.161 uit. Zoals eerder omschreven duurde DFS heel erg lang en sloot deze zichzelf vaak in. Voor dit algoritme hebben we dan ook geen resultaten kunnen berekenen. Dit geldt ook voor BFS. Ook de eerste versies van A* kwamen niet tot een volledige oplossing. Zoals hierboven vermeld, keken we daarom niet naar de kosten maar naar het aantal routes dan kon worden gelegd. Optimize zorgt overduidelijk voor goedkopere routes, maar doordat optimize op zo veel verschillende plekken wordt gebruikt, is het moeilijk een specifiek getal aan de verbetering te hangen. Bij de eindversie van dit project, met alle algoritmes gecombineerd, kunnen we wel weer naar concrete resultaten kijken. Bij het gebruiken van de optimale variable die hiervoor besproken zijn, krijgt netlist 9 gemiddeld een koste van 59.795. Dit is overduidelijk een grote verbetering ten opzichte van het random algoritme.
+*Als referentiepunt gebruiken we netlist 9, de meest ingewikkelde en langste netlist.*
+Bij het random algoritme krijgen we hele hoge kosten voor netlist 9. Lijn kruisten namelijk zichzelf en andere lijnen continue. Met het gebruik van 8 mogelijke lagen hebben we netlist 9, 6 keer gerund. Gemiddeld kwam hier een koste van 68.538.161 uit. Zoals eerder omschreven duurde DFS heel erg lang en sloot deze zichzelf vaak in. Voor dit algoritme hebben we dan ook geen resultaten kunnen berekenen. Dit geldt ook voor BFS. Ook de eerste versies van A* kwamen niet tot een volledige oplossing. Zoals hierboven vermeld, keken we daarom niet naar de kosten, maar naar het aantal routes dan kon worden gelegd. Optimize zorgt overduidelijk voor goedkopere routes, maar doordat optimize op zo veel verschillende plekken wordt gebruikt, is het moeilijk een specifiek getal aan de verbetering te hangen. Bij de eindversie van dit project, met alle algoritmes gecombineerd, kunnen we wel weer naar concrete resultaten kijken. Bij het gebruiken van de optimale variable die hiervoor besproken zijn, krijgt netlist 9 gemiddeld een koste van 59.795. Dit is overduidelijk een grote verbetering ten opzichte van het random algoritme.
 
 ## **Idee voor in de toekomst**
 Op dit moment is er nog veel variatie in de resultaten. Het is daarom wellicht een goed idee om uit te zoeken of er een patroon is bij welke random configuraties in de hill climber de beste resultaten gevonden worden.
