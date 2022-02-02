@@ -6,6 +6,8 @@
 * Finn Peranovic 12740454
 * Rachel de Haan 12423254
 """
+import copy
+
 from code.algorithm import find_route 
 from code.helper import manhattan_distance, route_costs, costs
 
@@ -13,19 +15,19 @@ def final_optimize(line, netlist, chips_dict, board_size, board):
     """
     Optimizes the board until there is differences in costs
     """
-    old_cost = costs(board, netlist)
+    old_cost = costs(netlist)
 
     for line in netlist:
         optimize(line, chips_dict, board_size, board)
 
-    new_cost = costs(board, netlist)
+    new_cost = costs(netlist)
 
     while new_cost < old_cost:
         old_cost = new_cost
         for line in netlist:
             optimize(line, chips_dict, board_size, board)
         
-        new_cost = costs(board, netlist)
+        new_cost = costs(netlist)
 
 
 def optimize(line, chips_dict, board_size, board, overlap = False):
@@ -33,14 +35,14 @@ def optimize(line, chips_dict, board_size, board, overlap = False):
     Optimizes a line in-place.
     """
     # route that is going to be optimzed
-    current_route = line.route
+    current_route = copy.deepcopy(line.route)
 
     # remove the route from the board
     board.remove_route(line)
 
     # optimze the route
     better = optimize_route(current_route, chips_dict, board_size, board, overlap)
-    
+
     # keep trying to optimize route while better routes are found
     while len(better) < len(current_route):
         current_route = better
@@ -48,7 +50,7 @@ def optimize(line, chips_dict, board_size, board, overlap = False):
 
     # put the coordinates of the optimized route on the board
     board.lines.extend(current_route[1:-1])
-    line.route = current_route
+    line.route = copy.deepcopy(current_route)
 
 
 def optimize_route(route, chips_dict, board_size, board, overlap = False):
@@ -57,20 +59,20 @@ def optimize_route(route, chips_dict, board_size, board, overlap = False):
     """
     # loop from outer ends of route to the middle
     for i, point_one in enumerate(route):
-        for j, point_two in reversed(list(enumerate(route[i:]))):
-            distance = manhattan_distance(point_one, point_two)
-            route_distance = j - i
+        for j, point_two in reversed(list(enumerate(route))):
+            if i < j:
+                distance = manhattan_distance(point_one, point_two)
+                route_distance = j - i
 
-            if distance > 1 and route_distance > distance:
+                if distance > 1 and route_distance > distance:
 
-                # find the shortest possible A* route between two points
-                possible_new_route = find_route(point_one, point_two, chips_dict, board_size, board, overlap)
-                new_route = possible_new_route[0]
+                    # find the shortest possible A* route between two points
+                    possible_new_route = find_route(point_one, point_two, chips_dict, board_size, board, overlap)
+                    new_route = possible_new_route[0]
 
-                # check if the cost of this new route is lower than the cost of the old route
-                if route_costs(board, new_route) <  route_costs(board, route[i:j]) and len(new_route) > 0 and possible_new_route[1]:
-                    route = update_route(route, new_route, i, j)
-                    return route
+                    # check if the cost of this new route is lower than the cost of the old route
+                    if route_costs(board, new_route) <  route_costs(board, route[i:j]) and len(new_route) > 0 and possible_new_route[1]:
+                        return update_route(route, new_route, i, j)
 
     # no better route is found
     return route
@@ -84,22 +86,20 @@ def update_route(route, new_route, i, j):
         temp = route[:i]
         temp.extend(new_route)
         temp.extend(route[j + 1:])
-        route = temp
     
     # update the end of the old route
     elif len(route[:i]) > 0:
         temp = route[:i]
         temp.extend(new_route)
-        route = temp
     
     # update the beginning of the old route
     elif len(route[j:]) > 0:
         temp = route[j + 1:]
         new_route.extend(temp)
-        route = new_route
+        temp = new_route
     
     # update the whole route
     else:
-        route = new_route
+        temp = new_route
     
-    return route
+    return temp
