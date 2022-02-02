@@ -244,7 +244,7 @@ def closest_point_per_line(
     line, x_range, y_range, coordinate, chips_dict, board_size, board, overlap
 ):
     """
-    Given a line and a coordinate, trys to find the point on the line with the clostest a* distance.
+    Given a line and a coordinate, tries to find the point on the line with the smallest a* distance.
     """
     closest_point = []
 
