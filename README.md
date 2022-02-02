@@ -37,7 +37,7 @@ Deze codebase is volledig geschreven in [Python3.7.3](https://www.python.org/dow
   * **chip_2:**
     * output.csv-bestand van netlist 7-9
   * **optimize:** 
-    * output.csv-bestand 
+    * resultaten van experimenten 
   * **plots:**
     * plot.png-bestanden
 * README.md
@@ -169,20 +169,14 @@ De gebruiker bepaalt een aantal variabelen in de hill climber. De hill climber g
 Om te testen welke waarden voor verschillende gebruikte variabelen optimaal zijn om in de beste versie de kosten nog verder te verlagen, zijn verschillende combinaties getest.
 De variabelen waar naar gekeken is zijn de strafkosten voor de richtingen (de windrichtingen en omhoog en naar beneden, in de code 'wind', 'up' en 'down'), het bereik van de willekeurige waarden hiervoor bij de hill climber ('options'), het maximale aantal verschillende combinaties voor deze strafkosten ('len_choices') en hoe vaak dit alles herhaald moet worden met een willekeurige leg volgorde van de routes ('shuffles').  
 
-Eerst is onderzocht wat de beste wind, up, down is door verschillende combinaties van wind, up, down te runnen en kosten te berekenen voor elke netlist. Voor wind, up en down is gekeken naar elke combinatie van waarden van 0 tot en met 4. Dit zijn dus 5\*5\*5 = 125 mogelijke combinaties. Na meerdere keren runnen zijn we er achter gekomen dat als up de hoogste waarde heeft, dat dit tot slechte resultaten levert. Ook zijn we er achter gekomen resultaten waarbij de verhouding tussen wind up en down vergelijkbaar is als bij 2, 0 en 1, respectievelijk, dit tot geen significante verschillen opleverde. Daarom hebben we gekozen voor wind = 2, up = 0 en down = 1.
+Eerst is onderzocht wat de beste wind, up, down is door verschillende combinaties van wind, up, down te runnen en kosten te berekenen voor elke netlist. Voor wind, up en down is gekeken naar elke combinatie van waarden van 0 tot en met 4. Dit zijn dus 5\*5\*5 = 125 mogelijke combinaties. Na meerdere keren runnen zijn we er achter gekomen dat als up de hoogste waarde heeft, dat dit tot slechte resultaten levert. Ook zijn we er achter gekomen resultaten waarbij de verhouding tussen wind up en down vergelijkbaar is als bij 2, 0 en 1, respectievelijk, dit tot geen significante verschillen opleverde. Het aantal lijnen die niet gevonden kunnen worden met het A* algoritme met de recursieve functie, is nooit lager dan bij deze verdeling van de extra kosten. Dit is ook te zien in het bestand ```optimize/wind_up_down.csv```  Daarom hebben we gekozen voor wind = 2, up = 0 en down = 1.
 
 Vervolgens is gekeken wat de beste combinatie van options, len_choices, en shuffles zijn. Hierbij is gekeken naar de waarden 5 en 10 voor options, 10, 50 en 100 voor len_choices en 1 en 5 voor shuffles. Dit zijn dus 2\*3\*2 = 12 mogelijke combinaties. Ook hier is een lagere prijs een betere score.
 
 
 ## **Resultaten**  
-!random te vaak runnen voor goede resultaten
-DFS doet te te lang en sloot zichzelf in
-BFS deed te lang, ging wel voor kortste route maar sloot zichzelf ook in
-A* ook vaak in de knoop want bleef vaak op niveau 0
-extra kosten 201 vind wel meer routes, maar loste niet meer netlists op
-optimize maakte bestaande routes korter nadat de routes gelegd werd wat een kleine winst in de kosten opleverde
-recursieve functie loste netlist 3 op en verbeterde andere netlists
-voor hillclimber werden overige routes volgens Manhattan distance gelegd, daarna hillclimber, die leverde de volgende kosten op:
+*Als reverentiepunt gebruiken we netlist 9, de meest ingewikkelde en langste netlist.*
+Bij het random algortime krijgen we hele hoge kosten voor netlist 9. Lijn kruisten namelijk zichzelf en andere lijnen continue. Met het gebruik van 8 mogelijke lagen hebben we netlist 9, 6 keer gerund. Gemiddeld kwam hier een koste van 68.538.161 uit. Zoals eerder omschreven duurde DFS heel erg lang en sloot deze zichzelf vaak in. Voor dit algoritme hebben we dan ook geen resultaten kunnen berekenen. Dit geldt ook voor BFS. Ook de eerste versies van A* kwamen niet tot een volledige oplossing. Zoals hierboven vermeld, keken we daarom niet naar de kosten maar naar het aantal routes dan kon worden gelegd. Optimize zorgt overduidelijk voor goedkopere routes, maar doordat optimize op zo veel verschillende plekken wordt gebruikt, is het moeilijk een specifiek getal aan de verbetering te hangen. Bij de eindversie van dit project, met alle algoritmes gecombineerd, kunnen we wel wwer naar concrete resultaten kijken. Bij het gebruiken van de optimale variable die hiervoor besproken zijn, krijgt netlist 9 wanneer deze zes maal gerund wordt, gemiddeld een koste van [INSERT KOSTEN]. Dit is overduidelijk een grote verbetering tenopzichte van het random algoritme.
 
 ## **Idee voor in de toekomst**
 Op dit moment is er nog veel variatie in de resultaten. Het is daarom wellicht een goed idee om uit te zoeken of er een patroon is bij welke random configuraties in de hill climber de beste resultaten gevonden worden.
