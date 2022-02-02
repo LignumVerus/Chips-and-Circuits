@@ -159,7 +159,7 @@ def input_shuffles():
 
 def check_input(chip, net):
     """
-    Check if chip netlist combination exists
+    Checks if chip netlist combination exists
     """
     if chip == 0 and (net < 1 or net > 3):
         print("Chip 0 only has netlist 1, 2 and 3")
