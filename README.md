@@ -171,7 +171,7 @@ De variabelen waar naar gekeken is zijn de strafkosten voor de richtingen (de wi
 
 Eerst is onderzocht wat de beste wind, up, down is door verschillende combinaties van wind, up, down te runnen en kosten te berekenen voor elke netlist. Voor wind, up en down is gekeken naar elke combinatie van waarden van 0 tot en met 4. Dit zijn dus 5\*5\*5 = 125 mogelijke combinaties. Na meerdere keren runnen zijn we er achter gekomen dat als up de hoogste waarde heeft, dat dit tot slechte resultaten levert. Ook zijn we er achter gekomen dat resultaten waarbij de verhouding tussen wind up en down vergelijkbaar is als bij 2, 0 en 1, respectievelijk, dit significante verschillen opleverde. Het aantal lijnen die niet gevonden kunnen worden met het A* algoritme met de recursieve functie, is nooit lager dan bij deze verdeling van de extra kosten. Dit is ook te zien in het bestand ```optimize/wind_up_down.csv```  Daarom hebben we gekozen voor wind = 2, up = 0 en down = 1.
 
-Vervolgens is gekeken wat de beste combinatie van options, len_choices, en shuffles zijn. Hierbij is gekeken naar de waarden 5 en 10 voor options, 10, 50 en 100 voor len_choices en 1 en 5 voor shuffles. Dit zijn dus 2\*3\*2 = 12 mogelijke combinaties. Ook hier is een lagere prijs een betere score.
+Vervolgens is gekeken wat de beste combinatie van options, len_choices, en shuffles zijn. Hierbij is gekeken naar de waarden 5 en 10 voor options, 10, 50 en 100 voor len_choices en 1 en 5 voor shuffles. Dit zijn dus 2\*3\*2 = 12 mogelijke combinaties. De exacte resulaten van alle combinaties zijn te vinden in het bestand ```optimize/options_len_choices_shuffles.csv```.
 
 
 ## **Resultaten**  
