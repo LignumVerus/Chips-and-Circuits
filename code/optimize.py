@@ -15,19 +15,19 @@ def final_optimize(line, netlist, chips_dict, board_size, board):
     """
     Optimizes the board until there is differences in costs
     """
-    old_cost = costs(netlist)
+    old_cost = costs(board, netlist)
 
     for line in netlist:
         optimize(line, chips_dict, board_size, board)
 
-    new_cost = costs(netlist)
+    new_cost = costs(board, netlist)
 
     while new_cost < old_cost:
         old_cost = new_cost
         for line in netlist:
             optimize(line, chips_dict, board_size, board)
         
-        new_cost = costs(netlist)
+        new_cost = costs(board, netlist)
 
 
 def optimize(line, chips_dict, board_size, board, overlap = False):
