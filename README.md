@@ -173,9 +173,9 @@ Eerst is onderzocht wat de beste wind, up, down is door verschillende combinatie
 
 Vervolgens is gekeken wat de beste combinatie van options, len_choices, en shuffles zijn. Hierbij is gekeken naar de waarden 5 en 10 voor options, 10, 50 en 100 voor len_choices en 1 en 5 voor shuffles. Dit zijn dus 2\*3\*2 = 12 mogelijke combinaties. De exacte resulaten van alle combinaties zijn te vinden in het bestand ```optimize/options_len_choices_shuffles.csv```. De beste variablen lijken de volgende te zijn: options = 5, len_choices = 100, shuffles = 1. Het verschilt echter enigsinds per netlist. Dit is duidelijk te zien in onderstaande afbeelding:
 
-![Figuur 3: kosten per combinatie. Goedkoopste combinatie verschilt per netlist]()
+![Figuur 3: kosten per combinatie. Goedkoopste combinatie verschilt per netlist](doc/Experiment_graph.png)
 
-*Figuur 3: kosten per combinatie. Goedkoopste combinatie verschilt per netlist*
+*Figuur 3: kosten per combinatie. Goedkoopste combinatie verschilt per netlist. Bij bijvoorbeeld de grijze lijn, '10,50,1', stelt 10 de options voor, 50 de len_choices en 1 het aantal shuffles*
 
 ## **Resultaten**  
 *Als reverentiepunt gebruiken we netlist 9, de meest ingewikkelde en langste netlist.*
